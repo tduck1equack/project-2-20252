@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../providers/prisma.service';
+import { JournalService } from '../../accounting/services/journal.service';
 import { MovementType, MovementStatus, StockMovement, Prisma } from '@repo/database';
 
 interface CreateMovementDto {
@@ -17,7 +18,10 @@ interface CreateMovementDto {
 
 @Injectable()
 export class StockMovementService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private journalService: JournalService
+    ) { }
 
     async create(tenantId: string, createdById: string, data: CreateMovementDto) {
         if (data.type === 'TRANSFER' && (!data.fromWarehouseId || !data.toWarehouseId)) {
@@ -67,6 +71,47 @@ export class StockMovementService {
                 } else if (data.type === 'TRANSFER' && data.fromWarehouseId && data.toWarehouseId) {
                     await this.adjustStock(tx, data.fromWarehouseId, item.productVariantId, -item.quantity, item.batchId);
                     await this.adjustStock(tx, data.toWarehouseId, item.productVariantId, item.quantity, item.batchId);
+                }
+            }
+
+            // 3. Automated Accounting Posting (Phase 3 Requirement)
+            // Mock Logic: 
+            // INBOUND = Debit Inventory (152), Credit Payable (331). Value = qty * 100,000 (mock cost)
+            // OUTBOUND = Debit COGS (632), Credit Inventory (152).
+
+            // Note: In a real system, we'd fetch product cost (FIFO/AVCO)
+
+            const totalValue = data.items.reduce((sum, item) => sum + (item.quantity * 100000), 0);
+
+            if (totalValue > 0) {
+                // Find Accounts (Ideally these IDs come from configuration/constants)
+                // For MVP, we fetch by Code. 
+                // Optimization: Cache these lookups.
+
+                const inventoryAccount = await tx.account.findFirst({ where: { code: '152', tenantId } });
+                const payableAccount = await tx.account.findFirst({ where: { code: '331', tenantId } });
+                const cogsAccount = await tx.account.findFirst({ where: { code: '632', tenantId } });
+
+                if (data.type === 'INBOUND' && inventoryAccount && payableAccount) {
+                    await this.journalService.createWithTransaction(tx, tenantId, createdById, {
+                        date: data.date || new Date(),
+                        reference: code,
+                        description: `Auto-generated from Inbound ${code}`,
+                        lines: [
+                            { accountId: inventoryAccount.id, debit: totalValue, credit: 0, description: 'Inventory Increase' },
+                            { accountId: payableAccount.id, debit: 0, credit: totalValue, description: 'Payable Increase' }
+                        ]
+                    });
+                } else if (data.type === 'OUTBOUND' && inventoryAccount && cogsAccount) {
+                    await this.journalService.createWithTransaction(tx, tenantId, createdById, {
+                        date: data.date || new Date(),
+                        reference: code,
+                        description: `Auto-generated from Outbound ${code}`,
+                        lines: [
+                            { accountId: cogsAccount.id, debit: totalValue, credit: 0, description: 'COGS' },
+                            { accountId: inventoryAccount.id, debit: 0, credit: totalValue, description: 'Inventory Decrease' }
+                        ]
+                    });
                 }
             }
 

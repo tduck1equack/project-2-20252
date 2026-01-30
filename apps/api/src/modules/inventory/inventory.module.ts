@@ -4,8 +4,10 @@ import { WarehouseService } from './services/warehouse.service';
 import { StockMovementController } from './controllers/stock-movement.controller';
 import { StockMovementService } from './services/stock-movement.service';
 import { PrismaService } from '../../providers/prisma.service';
+import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({
+    imports: [AccountingModule],
     controllers: [WarehouseController, StockMovementController],
     providers: [WarehouseService, StockMovementService, PrismaService],
     exports: [WarehouseService, StockMovementService],

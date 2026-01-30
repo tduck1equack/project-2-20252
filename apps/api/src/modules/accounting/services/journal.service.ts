@@ -18,12 +18,18 @@ interface CreateJournalDto {
 export class JournalService {
     constructor(private prisma: PrismaService) { }
 
+    // Updated for Transaction Support
     async create(tenantId: string, createdById: string, data: CreateJournalDto) {
+        return this.prisma.$transaction(async (tx) => {
+            return this.createWithTransaction(tx, tenantId, createdById, data);
+        });
+    }
+
+    async createWithTransaction(tx: Prisma.TransactionClient, tenantId: string, createdById: string, data: CreateJournalDto) {
         // 1. Validate Double Entry Balance
         const totalDebit = data.lines.reduce((sum, line) => sum + (line.debit || 0), 0);
         const totalCredit = data.lines.reduce((sum, line) => sum + (line.credit || 0), 0);
 
-        // Using a small epsilon for floating point comparison if needed, but standard exact check is usually preferred in accounting unless rounding issues
         if (Math.abs(totalDebit - totalCredit) > 0.01) {
             throw new BadRequestException(`Journal Entry is not balanced. Debit: ${totalDebit}, Credit: ${totalCredit}`);
         }
@@ -33,14 +39,14 @@ export class JournalService {
         }
 
         // 2. Create Entry
-        return this.prisma.journalEntry.create({
+        return tx.journalEntry.create({
             data: {
                 date: data.date ? new Date(data.date) : new Date(),
                 reference: data.reference,
                 description: data.description,
-                status: JournalStatus.POSTED, // Auto-post manual entries for now
+                status: JournalStatus.POSTED,
                 tenantId,
-                createdById, // Optional relation
+                createdById,
                 lines: {
                     create: data.lines.map(line => ({
                         accountId: line.accountId,
