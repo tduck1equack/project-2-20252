@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '@repo/database';
+import { PrismaService } from '../../providers/prisma.service';
 import { ProductController } from './products/product.controller';
 import { ProductService } from './products/product.service';
 import { WarehouseController } from './warehouses/warehouse.controller';
@@ -10,7 +10,7 @@ import { StockMovementController } from './movements/movement.controller';
 import { MovementService } from './movements/movement.service';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [],
     controllers: [
         ProductController,
         WarehouseController,
@@ -18,6 +18,7 @@ import { MovementService } from './movements/movement.service';
         StockMovementController
     ],
     providers: [
+        PrismaService,
         ProductService,
         WarehouseService,
         StockService,

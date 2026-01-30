@@ -7,10 +7,12 @@ import { CatalogModule } from './modules/catalog/catalog.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
 import { EInvoiceModule } from './modules/einvoice/einvoice.module';
 import { RedisModule } from './redis';
+import { SharedModule } from './modules/shared/shared.module';
 
 @Module({
   imports: [
-    RedisModule,
+    RedisModule, // Global
+    SharedModule, // Global Utilities & Logger
     AuthModule,
     InventoryModule,
     CatalogModule,
