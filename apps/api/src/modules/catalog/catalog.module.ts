@@ -5,7 +5,7 @@ import { ProductController } from './controllers/product.controller';
 import { ProductService } from './services/product.service';
 import { BatchController } from './controllers/batch.controller';
 import { BatchService } from './services/batch.service';
-import { PrismaService } from '../../providers/prisma.service';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
 
 @Module({
     controllers: [UomController, ProductController, BatchController],

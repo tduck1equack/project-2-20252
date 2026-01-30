@@ -2,7 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { env } from '@repo/config';
-import { TokenBlacklistService } from '../../../redis/token-blacklist.service';
+import { TokenBlacklistService } from '../../infrastructure/redis/token-blacklist.service';
 import { TokenPayload } from '@repo/dto';
 
 @Injectable()

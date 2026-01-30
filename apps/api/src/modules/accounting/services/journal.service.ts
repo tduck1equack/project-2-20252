@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../../providers/prisma.service';
+import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { JournalStatus, Prisma } from '@repo/database';
 
 interface CreateJournalDto {

@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../../providers/prisma.service';
+import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { EInvoiceProvider, InvoiceData } from '../interfaces/einvoice-provider.interface';
 import { MockInvoiceProvider } from '../providers/mock-einvoice.provider';
 import { EInvoiceStatus, Prisma } from '@repo/database';

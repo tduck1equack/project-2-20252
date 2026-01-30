@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../../providers/prisma.service';
-import { TokenBlacklistService } from '../../redis/token-blacklist.service';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
+import { TokenBlacklistService } from '../infrastructure/redis/token-blacklist.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { env } from '@repo/config';

@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../../providers/prisma.service';
+import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { JournalService } from '../../accounting/services/journal.service';
 import { MovementType, MovementStatus, StockMovement, Prisma } from '@repo/database';
 

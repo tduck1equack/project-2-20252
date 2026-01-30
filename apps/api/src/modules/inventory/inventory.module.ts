@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from '../../providers/prisma.service';
+import { InfrastructureModule } from '../infrastructure/infrastructure.module';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
 import { ProductController } from './products/product.controller';
 import { ProductService } from './products/product.service';
 import { WarehouseController } from './warehouses/warehouse.controller';
@@ -9,8 +10,13 @@ import { StockService } from './stock/stock.service';
 import { StockMovementController } from './movements/movement.controller';
 import { MovementService } from './movements/movement.service';
 
+import { PrismaProductRepository } from './repositories/product.repository';
+
+import { PrismaStockRepository } from './repositories/stock.repository';
+import { CreateStockMovementUseCase } from './use-cases/create-stock-movement.use-case';
+
 @Module({
-    imports: [],
+    imports: [InfrastructureModule],
     controllers: [
         ProductController,
         WarehouseController,
@@ -18,11 +24,19 @@ import { MovementService } from './movements/movement.service';
         StockMovementController
     ],
     providers: [
-        PrismaService,
         ProductService,
         WarehouseService,
         StockService,
-        MovementService
+        MovementService,
+        CreateStockMovementUseCase,
+        {
+            provide: 'ProductRepository',
+            useClass: PrismaProductRepository
+        },
+        {
+            provide: 'StockRepository',
+            useClass: PrismaStockRepository
+        }
     ],
     exports: [
         ProductService,

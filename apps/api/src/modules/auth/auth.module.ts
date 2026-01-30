@@ -6,14 +6,14 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from '@repo/config';
 import { AuthController } from './auth.controller';
-import { PrismaService } from '../../providers/prisma.service';
-import { RedisModule, TokenBlacklistService } from '../../redis';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
+import { TokenBlacklistService } from '../infrastructure/redis/token-blacklist.service';
 import { RolesGuard } from './guards/roles.guard';
 
 @Module({
     imports: [
         PassportModule,
-        RedisModule,
+
         JwtModule.register({
             secret: env.JWT_SECRET,
             signOptions: { expiresIn: '15m' },

@@ -3,7 +3,7 @@ import { AccountController } from './controllers/account.controller';
 import { AccountService } from './services/account.service';
 import { JournalController } from './controllers/journal.controller';
 import { JournalService } from './services/journal.service';
-import { PrismaService } from '../../providers/prisma.service';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
 
 @Module({
     controllers: [AccountController, JournalController],
