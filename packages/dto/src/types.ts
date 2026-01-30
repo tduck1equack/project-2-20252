@@ -1,3 +1,11 @@
+export enum Role {
+    ADMIN = 'ADMIN',
+    MANAGER = 'MANAGER',
+    EMPLOYEE = 'EMPLOYEE',
+    ACCOUNTANT = 'ACCOUNTANT',
+    CUSTOMER = 'CUSTOMER'
+}
+
 export type UserRole = 'ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'ACCOUNTANT' | 'CUSTOMER';
 
 export interface User {

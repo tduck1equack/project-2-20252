@@ -86,6 +86,7 @@ model Tenant {
   journalEntries  JournalEntry[]
   einvoiceConfigs EInvoiceProviderConfig[]
   einvoiceLogs    EInvoiceLog[]
+  salesOrders     SalesOrder[]
 }
 
 enum AccountType {
@@ -177,6 +178,7 @@ model User {
   movementsCreated StockMovement[]
   journalEntries   JournalEntry[]
   refreshTokens    RefreshToken[]
+  orders           SalesOrder[]
 }
 
 enum Role {
@@ -233,11 +235,55 @@ model ProductVariant {
   sku           String              @unique
   productId     String
   product       Product             @relation(fields: [productId], references: [id])
+  price         Decimal             @default(0) @db.Decimal(10, 2)
   stocks        Stock[]
   movementItems StockMovementItem[]
   batches       Batch[]
+  orderItems    SalesOrderItem[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  CANCELLED
+}
+
+model SalesOrder {
+  id   String @id @default(uuid())
+  code String @unique // SO-2024-001
+
+  tenantId   String
+  tenant     Tenant @relation(fields: [tenantId], references: [id])
+  customerId String // User.id
+  customer   User   @relation(fields: [customerId], references: [id])
+
+  status      OrderStatus @default(PENDING)
+  totalAmount Decimal     @db.Decimal(12, 2)
+
+  items SalesOrderItem[]
+
+  movementId String?
+  movement   StockMovement? @relation(fields: [movementId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SalesOrderItem {
+  id               String         @id @default(uuid())
+  orderId          String
+  order            SalesOrder     @relation(fields: [orderId], references: [id])
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity         Float
+  unitPrice        Decimal        @db.Decimal(10, 2)
+  totalPrice       Decimal        @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Uom {
@@ -330,8 +376,9 @@ model StockMovement {
 
   items StockMovementItem[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  salesOrders SalesOrder[]
 }
 
 model StockMovementItem {

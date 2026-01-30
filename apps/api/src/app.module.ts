@@ -9,6 +9,7 @@ import { AccountingModule } from './modules/accounting/accounting.module';
 import { EInvoiceModule } from './modules/einvoice/einvoice.module';
 import { InfrastructureModule } from './modules/infrastructure/infrastructure.module';
 import { SharedModule } from './modules/shared/shared.module';
+import { SalesModule } from './modules/sales/sales.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SharedModule } from './modules/shared/shared.module';
     CatalogModule,
     AccountingModule,
     EInvoiceModule,
+    SalesModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],

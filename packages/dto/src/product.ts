@@ -14,6 +14,11 @@ export class ProductVariantDto {
 
     @ApiProperty()
     productId!: string;
+
+    @ApiProperty({ type: Number })
+    @IsNumber()
+    @IsOptional()
+    price?: number;
 }
 
 export class ProductDto {

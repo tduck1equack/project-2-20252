@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useProducts, useStockLevels } from '@/hooks/use-inventory';
-import { Package, Search, CheckCircle, XCircle } from 'lucide-react';
+import { useCartStore } from '@/stores/cart-store';
+import { Package, Search, CheckCircle, XCircle, ShoppingCart } from 'lucide-react';
 
 export default function ProductsPage() {
     const [search, setSearch] = useState('');
@@ -14,6 +16,7 @@ export default function ProductsPage() {
     // Actually `useStockLevels` returns ARRAY of stocks.
     // If we want "Is Available", we need sum of quantities.
     const { data: stocks } = useStockLevels(); // Fetches all stocks for user tenant
+    const { addItem } = useCartStore(); // Use Cart Store
 
     const getAvailability = (variantId: string) => {
         if (!stocks) return 'unknown';
@@ -23,12 +26,25 @@ export default function ProductsPage() {
         return total > 0 ? 'in-stock' : 'out-of-stock';
     };
 
+    const handleAddToCart = (product: any, variant: any) => {
+        addItem({
+            productVariantId: variant.id,
+            name: `${product.name} - ${variant.name}`,
+            price: Number(variant.price || 0), // Use price from variant (assumed existing now)
+            quantity: 1
+        });
+        // Ideally show toast here
+    };
+
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">Our Products</h1>
                 <p className="text-[rgb(var(--muted))] mt-1">Browse our tailored selection</p>
+                <Link href="/customer/cart" className="mt-2 inline-block text-primary hover:underline">
+                    View Cart
+                </Link>
             </div>
 
             {/* Filter */}
@@ -69,17 +85,18 @@ export default function ProductsPage() {
                                     return (
                                         <div key={variant.id} className="flex justify-between items-center text-sm">
                                             <span className="font-medium">{variant.name.replace(`${product.name} - `, '')}</span>
-                                            <div className="flex items-center gap-1.5">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-mono opacity-70">${variant.price || 0}</span>
                                                 {status === 'in-stock' ? (
-                                                    <>
-                                                        <CheckCircle className="w-3.5 h-3.5 text-[rgb(var(--success))]" />
-                                                        <span className="text-[rgb(var(--success))] text-xs">In Stock</span>
-                                                    </>
+                                                    <button
+                                                        onClick={() => handleAddToCart(product, variant)}
+                                                        className="text-[rgb(var(--primary))] hover:text-[rgb(var(--primary))]/80 p-1"
+                                                        title="Add to Cart"
+                                                    >
+                                                        <ShoppingCart className="w-4 h-4" />
+                                                    </button>
                                                 ) : (
-                                                    <>
-                                                        <XCircle className="w-3.5 h-3.5 text-[rgb(var(--error))]" />
-                                                        <span className="text-[rgb(var(--muted))] text-xs">Out</span>
-                                                    </>
+                                                    <span className="text-[rgb(var(--muted))] text-xs">Out</span>
                                                 )}
                                             </div>
                                         </div>
