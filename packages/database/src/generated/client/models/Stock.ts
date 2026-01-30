@@ -542,14 +542,6 @@ export type StockUncheckedUpdateManyWithoutBatchNestedInput = {
   deleteMany?: Prisma.StockScalarWhereInput | Prisma.StockScalarWhereInput[]
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type StockCreateWithoutWarehouseInput = {
   id?: string
   quantity?: number

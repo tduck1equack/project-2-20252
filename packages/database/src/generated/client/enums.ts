@@ -9,6 +9,25 @@
 * 🟢 You can import this file directly.
 */
 
+export const AccountType = {
+  ASSET: 'ASSET',
+  LIABILITY: 'LIABILITY',
+  EQUITY: 'EQUITY',
+  REVENUE: 'REVENUE',
+  EXPENSE: 'EXPENSE'
+} as const
+
+export type AccountType = (typeof AccountType)[keyof typeof AccountType]
+
+
+export const JournalStatus = {
+  DRAFT: 'DRAFT',
+  POSTED: 'POSTED'
+} as const
+
+export type JournalStatus = (typeof JournalStatus)[keyof typeof JournalStatus]
+
+
 export const Role = {
   ADMIN: 'ADMIN',
   USER: 'USER',

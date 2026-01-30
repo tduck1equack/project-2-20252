@@ -50,6 +50,21 @@ path.join(process.cwd(), "src/generated/client/libquery_engine-debian-openssl-3.
  */
 export type Tenant = Prisma.TenantModel
 /**
+ * Model Account
+ * 
+ */
+export type Account = Prisma.AccountModel
+/**
+ * Model JournalEntry
+ * 
+ */
+export type JournalEntry = Prisma.JournalEntryModel
+/**
+ * Model JournalEntryLine
+ * 
+ */
+export type JournalEntryLine = Prisma.JournalEntryLineModel
+/**
  * Model User
  * 
  */

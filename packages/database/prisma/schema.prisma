@@ -24,6 +24,84 @@ model Tenant {
   products       Product[]
   uoms           Uom[]
   stockMovements StockMovement[]
+  accounts       Account[]
+  journalEntries JournalEntry[]
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+model Account {
+  id   String      @id @default(uuid())
+  code String // e.g., "111", "131"
+  name String
+  type AccountType // Derived from first digit usually, but good to be explicit
+
+  details String? // Circular 200 description
+
+  apiCode String? @unique // Optional shorthand unique code per tenant? 
+  // Actually code needs to be unique per tenant.
+
+  parentId String?
+  parent   Account?  @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children Account[] @relation("AccountHierarchy")
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  journalLines JournalEntryLine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([code, tenantId])
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+}
+
+model JournalEntry {
+  id          String   @id @default(uuid())
+  date        DateTime
+  reference   String? // Link to external docs (Invoice #, PO #)
+  description String?
+
+  status JournalStatus @default(DRAFT)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+
+  lines JournalEntryLine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JournalEntryLine {
+  id      String       @id @default(uuid())
+  entryId String
+  entry   JournalEntry @relation(fields: [entryId], references: [id])
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  debit  Float @default(0)
+  credit Float @default(0)
+
+  description String? // Line specific description
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model User {
@@ -37,6 +115,7 @@ model User {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   movementsCreated StockMovement[]
+  journalEntries   JournalEntry[]
 }
 
 enum Role {

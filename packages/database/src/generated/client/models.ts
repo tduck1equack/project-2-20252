@@ -9,6 +9,9 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Tenant.ts'
+export type * from './models/Account.ts'
+export type * from './models/JournalEntry.ts'
+export type * from './models/JournalEntryLine.ts'
 export type * from './models/User.ts'
 export type * from './models/Warehouse.ts'
 export type * from './models/Product.ts'
