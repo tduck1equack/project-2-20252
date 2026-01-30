@@ -5,9 +5,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
+import { EInvoiceModule } from './modules/einvoice/einvoice.module';
 
 @Module({
-  imports: [AuthModule, InventoryModule, CatalogModule, AccountingModule],
+  imports: [AuthModule, InventoryModule, CatalogModule, AccountingModule, EInvoiceModule],
   controllers: [AppController],
   providers: [AppService],
 })

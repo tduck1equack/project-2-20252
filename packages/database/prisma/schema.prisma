@@ -14,18 +14,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model EInvoiceProviderConfig {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  provider String // e.g., "MOCK", "VIETTEL", "VNPT"
+
+  apiKey    String?
+  apiSecret String?
+  username  String?
+  password  String?
+
+  baseUrl String? // Override for defaults
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // Actually usually one Active provider suffices, but we might keep history.
+  // For now unique per tenant/provider.
+
+  @@unique([tenantId, provider]) // Can have multiple configs, but one per provider type per tenant? Or one active?
+}
+
+enum EInvoiceStatus {
+  PENDING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+model EInvoiceLog {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  // Link to Journal Entry or Invoice (Sales)
+  // For now, let's link to generic Reference string to avoid tight coupling until Sales module exists
+  transactionRef String? // e.g. "INV-001"
+
+  provider String // "MOCK"
+
+  externalId     String? // ID returned by provider
+  externalSerial String? // Invoice Series
+  externalNo     String? // Invoice Number
+
+  status EInvoiceStatus @default(PENDING)
+
+  requestPayload  String? // JSON
+  responsePayload String? // JSON
+
+  errorMessage String?
+
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Tenant {
-  id             String          @id @default(uuid())
-  name           String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  users          User[]
-  warehouses     Warehouse[]
-  products       Product[]
-  uoms           Uom[]
-  stockMovements StockMovement[]
-  accounts       Account[]
-  journalEntries JournalEntry[]
+  id              String                   @id @default(uuid())
+  name            String
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  users           User[]
+  warehouses      Warehouse[]
+  products        Product[]
+  uoms            Uom[]
+  stockMovements  StockMovement[]
+  accounts        Account[]
+  journalEntries  JournalEntry[]
+  einvoiceConfigs EInvoiceProviderConfig[]
+  einvoiceLogs    EInvoiceLog[]
 }
 
 enum AccountType {

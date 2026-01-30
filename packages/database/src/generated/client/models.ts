@@ -8,6 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/EInvoiceProviderConfig.ts'
+export type * from './models/EInvoiceLog.ts'
 export type * from './models/Tenant.ts'
 export type * from './models/Account.ts'
 export type * from './models/JournalEntry.ts'

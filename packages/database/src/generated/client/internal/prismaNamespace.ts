@@ -390,6 +390,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+  EInvoiceProviderConfig: 'EInvoiceProviderConfig',
+  EInvoiceLog: 'EInvoiceLog',
   Tenant: 'Tenant',
   Account: 'Account',
   JournalEntry: 'JournalEntry',
@@ -418,10 +420,158 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "account" | "journalEntry" | "journalEntryLine" | "user" | "warehouse" | "product" | "productVariant" | "uom" | "batch" | "stock" | "stockMovement" | "stockMovementItem"
+    modelProps: "eInvoiceProviderConfig" | "eInvoiceLog" | "tenant" | "account" | "journalEntry" | "journalEntryLine" | "user" | "warehouse" | "product" | "productVariant" | "uom" | "batch" | "stock" | "stockMovement" | "stockMovementItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
+    EInvoiceProviderConfig: {
+      payload: Prisma.$EInvoiceProviderConfigPayload<ExtArgs>
+      fields: Prisma.EInvoiceProviderConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EInvoiceProviderConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EInvoiceProviderConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.EInvoiceProviderConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EInvoiceProviderConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>
+        }
+        findMany: {
+          args: Prisma.EInvoiceProviderConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>[]
+        }
+        create: {
+          args: Prisma.EInvoiceProviderConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>
+        }
+        createMany: {
+          args: Prisma.EInvoiceProviderConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EInvoiceProviderConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.EInvoiceProviderConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>
+        }
+        update: {
+          args: Prisma.EInvoiceProviderConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.EInvoiceProviderConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EInvoiceProviderConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EInvoiceProviderConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.EInvoiceProviderConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceProviderConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.EInvoiceProviderConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEInvoiceProviderConfig>
+        }
+        groupBy: {
+          args: Prisma.EInvoiceProviderConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EInvoiceProviderConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EInvoiceProviderConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EInvoiceProviderConfigCountAggregateOutputType> | number
+        }
+      }
+    }
+    EInvoiceLog: {
+      payload: Prisma.$EInvoiceLogPayload<ExtArgs>
+      fields: Prisma.EInvoiceLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EInvoiceLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EInvoiceLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>
+        }
+        findFirst: {
+          args: Prisma.EInvoiceLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EInvoiceLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>
+        }
+        findMany: {
+          args: Prisma.EInvoiceLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>[]
+        }
+        create: {
+          args: Prisma.EInvoiceLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>
+        }
+        createMany: {
+          args: Prisma.EInvoiceLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EInvoiceLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>[]
+        }
+        delete: {
+          args: Prisma.EInvoiceLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>
+        }
+        update: {
+          args: Prisma.EInvoiceLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.EInvoiceLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EInvoiceLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EInvoiceLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.EInvoiceLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EInvoiceLogPayload>
+        }
+        aggregate: {
+          args: Prisma.EInvoiceLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEInvoiceLog>
+        }
+        groupBy: {
+          args: Prisma.EInvoiceLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EInvoiceLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EInvoiceLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EInvoiceLogCountAggregateOutputType> | number
+        }
+      }
+    }
     Tenant: {
       payload: Prisma.$TenantPayload<ExtArgs>
       fields: Prisma.TenantFieldRefs
@@ -1423,6 +1573,43 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const EInvoiceProviderConfigScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  provider: 'provider',
+  apiKey: 'apiKey',
+  apiSecret: 'apiSecret',
+  username: 'username',
+  password: 'password',
+  baseUrl: 'baseUrl',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EInvoiceProviderConfigScalarFieldEnum = (typeof EInvoiceProviderConfigScalarFieldEnum)[keyof typeof EInvoiceProviderConfigScalarFieldEnum]
+
+
+export const EInvoiceLogScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  transactionRef: 'transactionRef',
+  provider: 'provider',
+  externalId: 'externalId',
+  externalSerial: 'externalSerial',
+  externalNo: 'externalNo',
+  status: 'status',
+  requestPayload: 'requestPayload',
+  responsePayload: 'responsePayload',
+  errorMessage: 'errorMessage',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EInvoiceLogScalarFieldEnum = (typeof EInvoiceLogScalarFieldEnum)[keyof typeof EInvoiceLogScalarFieldEnum]
+
+
 export const TenantScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1644,6 +1831,13 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -1654,6 +1848,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EInvoiceStatus'
+ */
+export type EnumEInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EInvoiceStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EInvoiceStatus[]'
+ */
+export type ListEnumEInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EInvoiceStatus[]'>
     
 
 
@@ -1841,6 +2049,8 @@ export interface PrismaClientOptions {
   omit?: GlobalOmitConfig
 }
 export type GlobalOmitConfig = {
+  eInvoiceProviderConfig?: Prisma.EInvoiceProviderConfigOmit
+  eInvoiceLog?: Prisma.EInvoiceLogOmit
   tenant?: Prisma.TenantOmit
   account?: Prisma.AccountOmit
   journalEntry?: Prisma.JournalEntryOmit

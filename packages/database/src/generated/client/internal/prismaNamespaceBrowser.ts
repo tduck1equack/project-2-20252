@@ -49,6 +49,8 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 
 export const ModelName = {
+  EInvoiceProviderConfig: 'EInvoiceProviderConfig',
+  EInvoiceLog: 'EInvoiceLog',
   Tenant: 'Tenant',
   Account: 'Account',
   JournalEntry: 'JournalEntry',
@@ -78,6 +80,43 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const EInvoiceProviderConfigScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  provider: 'provider',
+  apiKey: 'apiKey',
+  apiSecret: 'apiSecret',
+  username: 'username',
+  password: 'password',
+  baseUrl: 'baseUrl',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EInvoiceProviderConfigScalarFieldEnum = (typeof EInvoiceProviderConfigScalarFieldEnum)[keyof typeof EInvoiceProviderConfigScalarFieldEnum]
+
+
+export const EInvoiceLogScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  transactionRef: 'transactionRef',
+  provider: 'provider',
+  externalId: 'externalId',
+  externalSerial: 'externalSerial',
+  externalNo: 'externalNo',
+  status: 'status',
+  requestPayload: 'requestPayload',
+  responsePayload: 'responsePayload',
+  errorMessage: 'errorMessage',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EInvoiceLogScalarFieldEnum = (typeof EInvoiceLogScalarFieldEnum)[keyof typeof EInvoiceLogScalarFieldEnum]
 
 
 export const TenantScalarFieldEnum = {

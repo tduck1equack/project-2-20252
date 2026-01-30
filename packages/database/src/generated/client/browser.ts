@@ -18,6 +18,16 @@ export { Prisma }
 export * as $Enums from './enums.ts'
 export * from './enums.ts';
 /**
+ * Model EInvoiceProviderConfig
+ * 
+ */
+export type EInvoiceProviderConfig = Prisma.EInvoiceProviderConfigModel
+/**
+ * Model EInvoiceLog
+ * 
+ */
+export type EInvoiceLog = Prisma.EInvoiceLogModel
+/**
  * Model Tenant
  * 
  */

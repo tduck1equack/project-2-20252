@@ -525,10 +525,6 @@ export type EnumAccountTypeFieldUpdateOperationsInput = {
   set?: $Enums.AccountType
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type AccountUpdateOneWithoutChildrenNestedInput = {
   create?: Prisma.XOR<Prisma.AccountCreateWithoutChildrenInput, Prisma.AccountUncheckedCreateWithoutChildrenInput>
   connectOrCreate?: Prisma.AccountCreateOrConnectWithoutChildrenInput

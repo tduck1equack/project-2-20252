@@ -428,10 +428,6 @@ export type BatchUncheckedUpdateManyWithoutProductVariantNestedInput = {
   deleteMany?: Prisma.BatchScalarWhereInput | Prisma.BatchScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type BatchCreateNestedOneWithoutStocksInput = {
   create?: Prisma.XOR<Prisma.BatchCreateWithoutStocksInput, Prisma.BatchUncheckedCreateWithoutStocksInput>
   connectOrCreate?: Prisma.BatchCreateOrConnectWithoutStocksInput

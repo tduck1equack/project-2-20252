@@ -29,8 +29,8 @@ export * from "./enums.ts"
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Tenants
- * const tenants = await prisma.tenant.findMany()
+ * // Fetch zero or more EInvoiceProviderConfigs
+ * const eInvoiceProviderConfigs = await prisma.eInvoiceProviderConfig.findMany()
  * ```
  * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -44,6 +44,16 @@ export { Prisma }
 path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node")
 path.join(process.cwd(), "src/generated/client/libquery_engine-debian-openssl-3.0.x.so.node")
 
+/**
+ * Model EInvoiceProviderConfig
+ * 
+ */
+export type EInvoiceProviderConfig = Prisma.EInvoiceProviderConfigModel
+/**
+ * Model EInvoiceLog
+ * 
+ */
+export type EInvoiceLog = Prisma.EInvoiceLogModel
 /**
  * Model Tenant
  * 

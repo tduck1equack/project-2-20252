@@ -9,6 +9,16 @@
 * 🟢 You can import this file directly.
 */
 
+export const EInvoiceStatus = {
+  PENDING: 'PENDING',
+  PUBLISHED: 'PUBLISHED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type EInvoiceStatus = (typeof EInvoiceStatus)[keyof typeof EInvoiceStatus]
+
+
 export const AccountType = {
   ASSET: 'ASSET',
   LIABILITY: 'LIABILITY',
