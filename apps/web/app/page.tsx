@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Package, BarChart3, FileText, Warehouse } from "lucide-react";
+import { ArrowRight, Package, BarChart3, FileText, Warehouse, LogIn, UserPlus } from "lucide-react";
 
 export default function Home() {
   return (
@@ -11,13 +11,20 @@ export default function Home() {
             <Package className="h-8 w-8 text-primary-500" />
             <span className="text-xl font-bold text-gradient">Project-2 ERP</span>
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <Link
-              href="/admin"
-              className="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/25 flex items-center gap-2 cursor-pointer"
+              href="/login"
+              className="px-5 py-2.5 text-[rgb(var(--foreground))] hover:bg-[rgb(var(--surface-elevated))] rounded-lg font-medium transition-all duration-300 flex items-center gap-2 cursor-pointer"
             >
-              Dashboard
-              <ArrowRight className="h-4 w-4" />
+              <LogIn className="h-4 w-4" />
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/25 flex items-center gap-2 cursor-pointer"
+            >
+              <UserPlus className="h-4 w-4" />
+              Get Started
             </Link>
           </div>
         </div>
@@ -51,17 +58,18 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: "200ms" }}>
             <Link
-              href="/admin"
+              href="/register"
               className="px-8 py-4 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/25 hover:-translate-y-1 flex items-center justify-center gap-2 cursor-pointer"
             >
-              Get Started
+              Start Free Trial
               <ArrowRight className="h-5 w-5" />
             </Link>
             <Link
-              href="/admin/inventory"
-              className="px-8 py-4 glass-card hover:bg-[rgb(var(--surface-elevated))] text-[rgb(var(--foreground))] rounded-xl font-semibold text-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+              href="/login"
+              className="px-8 py-4 glass-card hover:bg-[rgb(var(--surface-elevated))] text-[rgb(var(--foreground))] rounded-xl font-semibold text-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer flex items-center justify-center gap-2"
             >
-              View Inventory
+              <LogIn className="h-5 w-5" />
+              Sign In
             </Link>
           </div>
         </div>
@@ -113,8 +121,8 @@ export default function Home() {
               >
                 <div
                   className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${feature.color === "primary"
-                      ? "bg-primary-500/10 text-primary-500"
-                      : "bg-accent-500/10 text-accent-500"
+                    ? "bg-primary-500/10 text-primary-500"
+                    : "bg-accent-500/10 text-accent-500"
                     }`}
                 >
                   <feature.icon className="h-6 w-6" />
@@ -133,8 +141,18 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-8 border-t border-[rgb(var(--border))]">
-        <div className="max-w-7xl mx-auto px-6 text-center text-[rgb(var(--muted))] text-sm">
-          © 2026 Project-2 ERP. Built with Next.js, NestJS, and Prisma.
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-[rgb(var(--muted))] text-sm">
+            © 2026 Project-2 ERP. Built with Next.js, NestJS, and Prisma.
+          </div>
+          <div className="flex gap-6 text-sm">
+            <Link href="/login" className="text-[rgb(var(--muted))] hover:text-[rgb(var(--foreground))] transition-colors">
+              Sign In
+            </Link>
+            <Link href="/register" className="text-[rgb(var(--muted))] hover:text-[rgb(var(--foreground))] transition-colors">
+              Register
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

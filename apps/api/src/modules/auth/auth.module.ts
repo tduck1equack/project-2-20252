@@ -7,17 +7,27 @@ import { JwtModule } from '@nestjs/jwt';
 import { env } from '@repo/config';
 import { AuthController } from './auth.controller';
 import { PrismaService } from '../../providers/prisma.service';
+import { RedisModule, TokenBlacklistService } from '../../redis';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
     imports: [
         PassportModule,
+        RedisModule,
         JwtModule.register({
             secret: env.JWT_SECRET,
-            signOptions: { expiresIn: '60m' },
+            signOptions: { expiresIn: '15m' },
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, LocalStrategy, JwtStrategy, PrismaService],
-    exports: [AuthService],
+    providers: [
+        AuthService,
+        LocalStrategy,
+        JwtStrategy,
+        PrismaService,
+        TokenBlacklistService,
+        RolesGuard,
+    ],
+    exports: [AuthService, RolesGuard],
 })
 export class AuthModule { }
