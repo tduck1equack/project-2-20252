@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { Stock, StockMovement, Prisma, MovementType, MovementStatus } from '@prisma/client';
+import { Stock, StockMovement, Prisma, MovementType, MovementStatus } from '@repo/database';
 
 export interface CreateMovementItemData {
     productVariantId: string;

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useStockLevels, useWarehouses, useCreateMovement, useProducts } from '@/hooks/use-inventory';
+import { useInventorySocket } from '@/hooks/use-inventory-socket';
 import { useAuthStore } from '@/stores/auth-store';
 import { MovementType, CreateStockMovementDto } from '@repo/dto';
 import { Package, Plus, MapPin, Search } from 'lucide-react';
@@ -17,6 +18,7 @@ interface InboundForm {
 
 export default function StockPage() {
     const { user } = useAuthStore();
+    useInventorySocket(user?.tenantId || undefined);
     const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>('');
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -18,6 +19,7 @@ import { SharedModule } from './modules/shared/shared.module';
     CatalogModule,
     AccountingModule,
     EInvoiceModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

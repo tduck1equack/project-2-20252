@@ -14,9 +14,14 @@ import { PrismaProductRepository } from './repositories/product.repository';
 
 import { PrismaStockRepository } from './repositories/stock.repository';
 import { CreateStockMovementUseCase } from './use-cases/create-stock-movement.use-case';
+import { InventoryGateway } from './gateways/inventory.gateway';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-    imports: [InfrastructureModule],
+    imports: [
+        InfrastructureModule,
+        AuthModule // For WsAuthGuard
+    ],
     controllers: [
         ProductController,
         WarehouseController,
@@ -29,6 +34,7 @@ import { CreateStockMovementUseCase } from './use-cases/create-stock-movement.us
         StockService,
         MovementService,
         CreateStockMovementUseCase,
+        InventoryGateway, // WebSocket Gateway
         {
             provide: 'ProductRepository',
             useClass: PrismaProductRepository
