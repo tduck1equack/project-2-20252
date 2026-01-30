@@ -6,7 +6,8 @@
             "DOM",
             "DOM.Iterable"
         ],
-        "module": "CommonJS",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "outDir": "dist"
     },
     "include": [
