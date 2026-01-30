@@ -18,3 +18,22 @@ export const Role = {
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]
+
+
+export const MovementType = {
+  INBOUND: 'INBOUND',
+  OUTBOUND: 'OUTBOUND',
+  TRANSFER: 'TRANSFER',
+  ADJUSTMENT: 'ADJUSTMENT'
+} as const
+
+export type MovementType = (typeof MovementType)[keyof typeof MovementType]
+
+
+export const MovementStatus = {
+  DRAFT: 'DRAFT',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type MovementStatus = (typeof MovementStatus)[keyof typeof MovementStatus]

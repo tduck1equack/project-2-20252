@@ -10,4 +10,12 @@
  */
 export type * from './models/Tenant.ts'
 export type * from './models/User.ts'
+export type * from './models/Warehouse.ts'
+export type * from './models/Product.ts'
+export type * from './models/ProductVariant.ts'
+export type * from './models/Uom.ts'
+export type * from './models/Batch.ts'
+export type * from './models/Stock.ts'
+export type * from './models/StockMovement.ts'
+export type * from './models/StockMovementItem.ts'
 export type * from './commonInputTypes.ts'

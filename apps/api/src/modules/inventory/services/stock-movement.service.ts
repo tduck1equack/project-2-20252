@@ -1,0 +1,121 @@
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../../../providers/prisma.service';
+import { MovementType, MovementStatus, StockMovement, Prisma } from '@repo/database';
+
+interface CreateMovementDto {
+    type: MovementType;
+    date?: Date;
+    reference?: string;
+    fromWarehouseId?: string;
+    toWarehouseId?: string;
+    items: {
+        productVariantId: string;
+        quantity: number;
+        batchId?: string;
+    }[];
+}
+
+@Injectable()
+export class StockMovementService {
+    constructor(private prisma: PrismaService) { }
+
+    async create(tenantId: string, createdById: string, data: CreateMovementDto) {
+        if (data.type === 'TRANSFER' && (!data.fromWarehouseId || !data.toWarehouseId)) {
+            throw new BadRequestException('Transfer requires both fromWarehouseId and toWarehouseId');
+        }
+        if (data.type === 'INBOUND' && !data.toWarehouseId) {
+            throw new BadRequestException('Inbound requires toWarehouseId');
+        }
+        if (data.type === 'OUTBOUND' && !data.fromWarehouseId) {
+            throw new BadRequestException('Outbound requires fromWarehouseId');
+        }
+
+        // Generate code (mock implementation, ideally sequential)
+        const code = `MOV-${Date.now()}`;
+
+        // Transaction: Create Movement + Create Items + Update Stock
+        return this.prisma.$transaction(async (tx) => {
+            // 1. Create Header
+            const movement = await tx.stockMovement.create({
+                data: {
+                    code,
+                    type: data.type,
+                    status: MovementStatus.COMPLETED, // Auto-complete for now
+                    date: data.date || new Date(),
+                    reference: data.reference,
+                    fromWarehouseId: data.fromWarehouseId,
+                    toWarehouseId: data.toWarehouseId,
+                    tenantId,
+                    createdById,
+                    items: {
+                        create: data.items.map(item => ({
+                            productVariantId: item.productVariantId,
+                            quantity: item.quantity,
+                            batchId: item.batchId,
+                        })),
+                    },
+                },
+                include: { items: true },
+            });
+
+            // 2. Update Stock Levels based on Type
+            for (const item of data.items) {
+                if (data.type === 'INBOUND' && data.toWarehouseId) {
+                    await this.adjustStock(tx, data.toWarehouseId, item.productVariantId, item.quantity, item.batchId);
+                } else if (data.type === 'OUTBOUND' && data.fromWarehouseId) {
+                    await this.adjustStock(tx, data.fromWarehouseId, item.productVariantId, -item.quantity, item.batchId);
+                } else if (data.type === 'TRANSFER' && data.fromWarehouseId && data.toWarehouseId) {
+                    await this.adjustStock(tx, data.fromWarehouseId, item.productVariantId, -item.quantity, item.batchId);
+                    await this.adjustStock(tx, data.toWarehouseId, item.productVariantId, item.quantity, item.batchId);
+                }
+            }
+
+            return movement;
+        });
+    }
+
+    private async adjustStock(tx: Prisma.TransactionClient, warehouseId: string, productVariantId: string, quantity: number, batchId?: string) {
+        const stock = await tx.stock.findFirst({
+            where: {
+                warehouseId,
+                productVariantId,
+                batchId: batchId || null
+            },
+        });
+
+        if (stock) {
+            if (stock.quantity + quantity < 0) {
+                throw new BadRequestException(`Insufficient stock for variant ${productVariantId} (Batch: ${batchId || 'N/A'}) in warehouse ${warehouseId}`);
+            }
+            await tx.stock.update({
+                where: { id: stock.id },
+                data: { quantity: stock.quantity + quantity },
+            });
+        } else {
+            if (quantity < 0) {
+                throw new BadRequestException(`Insufficient stock (not found) for variant ${productVariantId} (Batch: ${batchId || 'N/A'}) in warehouse ${warehouseId}`);
+            }
+            await tx.stock.create({
+                data: {
+                    warehouseId,
+                    productVariantId,
+                    quantity,
+                    batchId: batchId ?? null,
+                },
+            });
+        }
+    }
+
+    async findAll(tenantId: string) {
+        return this.prisma.stockMovement.findMany({
+            where: { tenantId },
+            include: {
+                fromWarehouse: true,
+                toWarehouse: true,
+                items: { include: { productVariant: true } },
+                createdBy: { select: { name: true, email: true } }
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+}

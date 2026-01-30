@@ -50,7 +50,15 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 export const ModelName = {
   Tenant: 'Tenant',
-  User: 'User'
+  User: 'User',
+  Warehouse: 'Warehouse',
+  Product: 'Product',
+  ProductVariant: 'ProductVariant',
+  Uom: 'Uom',
+  Batch: 'Batch',
+  Stock: 'Stock',
+  StockMovement: 'StockMovement',
+  StockMovementItem: 'StockMovementItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -91,6 +99,113 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const WarehouseScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  location: 'location',
+  tenantId: 'tenantId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WarehouseScalarFieldEnum = (typeof WarehouseScalarFieldEnum)[keyof typeof WarehouseScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  sku: 'sku',
+  description: 'description',
+  uomId: 'uomId',
+  tenantId: 'tenantId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ProductVariantScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  sku: 'sku',
+  productId: 'productId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductVariantScalarFieldEnum = (typeof ProductVariantScalarFieldEnum)[keyof typeof ProductVariantScalarFieldEnum]
+
+
+export const UomScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  tenantId: 'tenantId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UomScalarFieldEnum = (typeof UomScalarFieldEnum)[keyof typeof UomScalarFieldEnum]
+
+
+export const BatchScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  productVariantId: 'productVariantId',
+  expiryDate: 'expiryDate',
+  manufacturingDate: 'manufacturingDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BatchScalarFieldEnum = (typeof BatchScalarFieldEnum)[keyof typeof BatchScalarFieldEnum]
+
+
+export const StockScalarFieldEnum = {
+  id: 'id',
+  warehouseId: 'warehouseId',
+  productVariantId: 'productVariantId',
+  batchId: 'batchId',
+  quantity: 'quantity',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StockScalarFieldEnum = (typeof StockScalarFieldEnum)[keyof typeof StockScalarFieldEnum]
+
+
+export const StockMovementScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  type: 'type',
+  status: 'status',
+  date: 'date',
+  reference: 'reference',
+  fromWarehouseId: 'fromWarehouseId',
+  toWarehouseId: 'toWarehouseId',
+  tenantId: 'tenantId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StockMovementScalarFieldEnum = (typeof StockMovementScalarFieldEnum)[keyof typeof StockMovementScalarFieldEnum]
+
+
+export const StockMovementItemScalarFieldEnum = {
+  id: 'id',
+  movementId: 'movementId',
+  productVariantId: 'productVariantId',
+  quantity: 'quantity',
+  batchId: 'batchId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StockMovementItemScalarFieldEnum = (typeof StockMovementItemScalarFieldEnum)[keyof typeof StockMovementItemScalarFieldEnum]
 
 
 export const SortOrder = {

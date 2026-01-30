@@ -54,3 +54,43 @@ export type Tenant = Prisma.TenantModel
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model Warehouse
+ * 
+ */
+export type Warehouse = Prisma.WarehouseModel
+/**
+ * Model Product
+ * 
+ */
+export type Product = Prisma.ProductModel
+/**
+ * Model ProductVariant
+ * 
+ */
+export type ProductVariant = Prisma.ProductVariantModel
+/**
+ * Model Uom
+ * 
+ */
+export type Uom = Prisma.UomModel
+/**
+ * Model Batch
+ * 
+ */
+export type Batch = Prisma.BatchModel
+/**
+ * Model Stock
+ * 
+ */
+export type Stock = Prisma.StockModel
+/**
+ * Model StockMovement
+ * 
+ */
+export type StockMovement = Prisma.StockMovementModel
+/**
+ * Model StockMovementItem
+ * 
+ */
+export type StockMovementItem = Prisma.StockMovementItemModel
