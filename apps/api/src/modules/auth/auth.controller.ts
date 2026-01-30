@@ -1,8 +1,10 @@
 import { Controller, Request, Post, UseGuards, Body, Get, Res, HttpCode, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiCookieAuth } from '@nestjs/swagger';
+import type { Response } from 'express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiCookieAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard, JwtAuthGuard } from './guards/auth.guard';
+import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { createSuccessResponse } from '../../common/dto/response.dto';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
@@ -14,19 +16,11 @@ export class AuthController {
 
     @Post('login')
     @UseGuards(LocalAuthGuard)
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login with email and password' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                email: { type: 'string', example: 'admin@example.com' },
-                password: { type: 'string', example: 'password123' },
-            },
-        },
-    })
     @ApiResponse({ status: 200, description: 'Returns access token, refresh token set in cookie' })
     @ApiResponse({ status: 401, description: 'Invalid credentials' })
-    async login(@Request() req: any, @Res({ passthrough: true }) res: Response) {
+    async login(@Body() _body: LoginDto, @Request() req: any, @Res({ passthrough: true }) res: Response) {
         const tokens = await this.authService.login(req.user);
 
         // Set refresh token as HttpOnly cookie
@@ -38,10 +32,10 @@ export class AuthController {
             path: '/auth', // Only sent to auth endpoints
         });
 
-        return {
+        return createSuccessResponse({
             accessToken: tokens.accessToken,
             expiresIn: tokens.expiresIn,
-        };
+        });
     }
 
     @Post('refresh')
@@ -54,7 +48,7 @@ export class AuthController {
         const oldRefreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
 
         if (!oldRefreshToken) {
-            return res.status(401).json({ message: 'No refresh token provided' });
+            return res.status(401).json({ success: false, error: { code: 'NO_TOKEN', message: 'No refresh token provided' } });
         }
 
         const tokens = await this.authService.refresh(oldRefreshToken);
@@ -68,10 +62,10 @@ export class AuthController {
             path: '/auth',
         });
 
-        return {
+        return createSuccessResponse({
             accessToken: tokens.accessToken,
             expiresIn: tokens.expiresIn,
-        };
+        });
     }
 
     @Post('logout')
@@ -89,26 +83,18 @@ export class AuthController {
         // Clear refresh token cookie
         res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/auth' });
 
-        return { message: 'Successfully logged out' };
+        return createSuccessResponse({ message: 'Successfully logged out' });
     }
 
     @Post('register')
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Register a new user' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                email: { type: 'string', example: 'user@example.com' },
-                password: { type: 'string', example: 'password123' },
-                name: { type: 'string', example: 'John Doe' },
-            },
-        },
-    })
     @ApiResponse({ status: 201, description: 'User registered successfully' })
-    async register(@Body() body: any) {
+    @ApiResponse({ status: 409, description: 'Email already exists' })
+    async register(@Body() body: RegisterDto) {
         const user = await this.authService.register(body);
         const { password, ...result } = user;
-        return result;
+        return createSuccessResponse(result);
     }
 
     @Get('profile')
@@ -118,6 +104,6 @@ export class AuthController {
     @ApiResponse({ status: 200, description: 'Returns user profile' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     getProfile(@Request() req: any) {
-        return req.user;
+        return createSuccessResponse(req.user);
     }
 }

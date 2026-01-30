@@ -175,12 +175,23 @@ export class AuthService {
         return this.tokenBlacklist.isBlacklisted(jti);
     }
 
-    async register(data: any) {
+    async register(data: { email: string; password: string; name?: string }) {
+        // Check if email already exists
+        const existing = await this.prisma.user.findUnique({
+            where: { email: data.email },
+        });
+
+        if (existing) {
+            throw new UnauthorizedException('Email already registered');
+        }
+
         const hashedPassword = await bcrypt.hash(data.password, 10);
         return this.prisma.user.create({
             data: {
-                ...data,
+                email: data.email,
                 password: hashedPassword,
+                name: data.name,
+                role: 'CUSTOMER', // Default role for new registrations
             },
         });
     }

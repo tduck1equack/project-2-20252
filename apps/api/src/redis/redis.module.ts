@@ -14,7 +14,6 @@ export const REDIS_CLIENT = 'REDIS_CLIENT';
                     host: env.REDIS_HOST,
                     port: env.REDIS_PORT,
                     maxRetriesPerRequest: 3,
-                    retryDelayOnFailover: 100,
                 });
 
                 redis.on('error', (err) => {

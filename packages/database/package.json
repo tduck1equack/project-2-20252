@@ -8,16 +8,21 @@
   "scripts": {
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^22.15.3",
     "prisma": "^6.3.1",
-    "typescript": "5.9.2"
+    "tsx": "^4.7.0",
+    "typescript": "5.9.2",
+    "dotenv": "^16.4.5"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
-    "@repo/config": "workspace:*"
+    "@repo/config": "workspace:*",
+    "bcrypt": "^5.1.1"
   }
 }
