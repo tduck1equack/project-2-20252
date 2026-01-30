@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { env } from '@repo/config';
 import { TokenBlacklistService } from '../../../redis/token-blacklist.service';
+import { TokenPayload } from '@repo/dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -14,15 +15,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: any) {
+    async validate(payload: TokenPayload) {
         // Check if token is blacklisted
         if (payload.jti && await this.tokenBlacklist.isBlacklisted(payload.jti)) {
             throw new UnauthorizedException('Token has been revoked');
         }
 
         return {
-            userId: payload.sub,
+            id: payload.sub,
             email: payload.email,
+            name: payload.name,
             role: payload.role,
             tenantId: payload.tenantId,
             jti: payload.jti,

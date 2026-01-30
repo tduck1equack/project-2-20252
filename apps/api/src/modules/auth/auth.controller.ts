@@ -3,14 +3,13 @@ import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiCookieAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard, JwtAuthGuard } from './guards/auth.guard';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
-import { createSuccessResponse } from '../../common/dto/response.dto';
+import { RegisterDto, LoginDto, createSuccessResponse } from '@repo/dto';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
 
 @ApiTags('Auth')
-@Controller('auth')
+@Controller('api/v1/auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
 
@@ -29,7 +28,7 @@ export class AuthController {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: COOKIE_MAX_AGE,
-            path: '/auth', // Only sent to auth endpoints
+            path: '/', // Allow refresh on all paths or specific api path
         });
 
         return createSuccessResponse({
@@ -59,7 +58,7 @@ export class AuthController {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: COOKIE_MAX_AGE,
-            path: '/auth',
+            path: '/',
         });
 
         return createSuccessResponse({
@@ -81,7 +80,7 @@ export class AuthController {
         await this.authService.logout(accessToken, refreshToken);
 
         // Clear refresh token cookie
-        res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/auth' });
+        res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
 
         return createSuccessResponse({ message: 'Successfully logged out' });
     }

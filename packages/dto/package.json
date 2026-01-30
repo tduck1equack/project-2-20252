@@ -1,0 +1,26 @@
+{
+    "name": "@repo/dto",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": "./dist/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint . --max-warnings 0",
+        "check-types": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@repo/eslint-config": "workspace:*",
+        "@repo/typescript-config": "workspace:*",
+        "typescript": "5.9.2",
+        "eslint": "^9.39.1"
+    },
+    "dependencies": {
+        "class-validator": "^0.14.1",
+        "class-transformer": "^0.5.1",
+        "@nestjs/swagger": "^11.2.5"
+    }
+}

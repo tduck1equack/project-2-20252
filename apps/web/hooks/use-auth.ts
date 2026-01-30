@@ -1,90 +1,53 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore, User, getPortalPath } from '@/stores/auth-store';
+import { useAuthStore, getPortalPath } from '@/stores/auth-store';
+import { LoginDto, RegisterDto, ApiResponseDto, User, TokenPair } from '@repo/dto';
 import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+// Local aliases if desired, or just use DTOs directly
+type LoginCredentials = LoginDto;
+type RegisterData = RegisterDto;
+type AuthResponse = TokenPair;
+type ApiResponse<T> = ApiResponseDto<T>;
 
-interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-interface RegisterData {
-    email: string;
-    password: string;
-    name?: string;
-}
-
-interface AuthResponse {
-    accessToken: string;
-    expiresIn: number;
-}
-
-// API functions
-async function loginApi(credentials: LoginCredentials): Promise<AuthResponse> {
-    const res = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(credentials),
-    });
-
-    if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Login failed');
+// API functions wrapper to handle standard response
+async function post<T>(url: string, data?: any): Promise<T> {
+    const response = await api.post<any, ApiResponse<T>>(url, data);
+    if (!response.success && response.error) {
+        throw new Error(response.error.message || 'Request failed');
     }
+    return response.data!;
+}
 
-    return res.json();
+async function get<T>(url: string, headers?: any): Promise<T> {
+    const response = await api.get<any, ApiResponse<T>>(url, { headers });
+    if (!response.success && response.error) {
+        throw new Error(response.error.message || 'Request failed');
+    }
+    return response.data!;
+}
+
+async function loginApi(credentials: LoginCredentials): Promise<AuthResponse> {
+    return post<AuthResponse>('/api/v1/auth/login', credentials);
 }
 
 async function registerApi(data: RegisterData): Promise<User> {
-    const res = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Registration failed');
-    }
-
-    return res.json();
+    return post<User>('/api/v1/auth/register', data);
 }
 
 async function getProfileApi(accessToken: string): Promise<User> {
-    const res = await fetch(`${API_URL}/auth/profile`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        credentials: 'include',
-    });
-
-    if (!res.ok) {
-        throw new Error('Failed to fetch profile');
-    }
-
-    return res.json();
+    return get<User>('/api/v1/auth/profile', { Authorization: `Bearer ${accessToken}` });
 }
 
 async function refreshTokenApi(): Promise<AuthResponse> {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-    });
-
-    if (!res.ok) {
-        throw new Error('Token refresh failed');
-    }
-
-    return res.json();
+    return post<AuthResponse>('/api/v1/auth/refresh');
 }
 
 async function logoutApi(accessToken: string): Promise<void> {
-    await fetch(`${API_URL}/auth/logout`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}` },
-        credentials: 'include',
+    await api.post('/api/v1/auth/logout', {}, {
+        headers: { Authorization: `Bearer ${accessToken}` }
     });
 }
 

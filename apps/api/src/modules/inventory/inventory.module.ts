@@ -1,15 +1,31 @@
 import { Module } from '@nestjs/common';
-import { WarehouseController } from './controllers/warehouse.controller';
-import { WarehouseService } from './services/warehouse.service';
-import { StockMovementController } from './controllers/stock-movement.controller';
-import { StockMovementService } from './services/stock-movement.service';
-import { PrismaService } from '../../providers/prisma.service';
-import { AccountingModule } from '../accounting/accounting.module';
+import { PrismaModule } from '@repo/database';
+import { ProductController } from './products/product.controller';
+import { ProductService } from './products/product.service';
+import { WarehouseController } from './warehouses/warehouse.controller';
+import { WarehouseService } from './warehouses/warehouse.service';
+import { StockController } from './stock/stock.controller';
+import { StockService } from './stock/stock.service';
+import { StockMovementController } from './movements/movement.controller';
+import { MovementService } from './movements/movement.service';
 
 @Module({
-    imports: [AccountingModule],
-    controllers: [WarehouseController, StockMovementController],
-    providers: [WarehouseService, StockMovementService, PrismaService],
-    exports: [WarehouseService, StockMovementService],
+    imports: [PrismaModule],
+    controllers: [
+        ProductController,
+        WarehouseController,
+        StockController,
+        StockMovementController
+    ],
+    providers: [
+        ProductService,
+        WarehouseService,
+        StockService,
+        MovementService
+    ],
+    exports: [
+        ProductService,
+        StockService
+    ]
 })
 export class InventoryModule { }

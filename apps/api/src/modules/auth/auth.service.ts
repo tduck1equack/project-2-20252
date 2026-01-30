@@ -9,13 +9,9 @@ import { env } from '@repo/config';
 const ACCESS_TOKEN_EXPIRES = '15m';
 const REFRESH_TOKEN_EXPIRES_DAYS = 7;
 
-interface TokenPayload {
-    sub: string;
-    email: string;
-    role: string;
-    tenantId: string | null;
-    jti: string;
-}
+import { TokenPayload, RegisterDto, User } from '@repo/dto';
+
+
 
 interface TokenPair {
     accessToken: string;
@@ -47,6 +43,7 @@ export class AuthService {
         const payload: TokenPayload = {
             sub: user.id,
             email: user.email,
+            name: user.name,
             role: user.role,
             tenantId: user.tenantId,
             jti,

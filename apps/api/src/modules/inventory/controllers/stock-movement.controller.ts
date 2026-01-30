@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../../auth/guards/auth.guard';
 @ApiTags('Inventory')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('stock-movements')
+@Controller('api/v1/stock-movements')
 export class StockMovementController {
     constructor(private readonly service: StockMovementService) { }
 

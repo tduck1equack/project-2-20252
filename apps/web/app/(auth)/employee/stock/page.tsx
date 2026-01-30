@@ -1,143 +1,214 @@
 'use client';
 
 import { useState } from 'react';
-import { Package, Search, AlertTriangle, TrendingUp, TrendingDown, Eye, Edit2 } from 'lucide-react';
+import { useStockLevels, useWarehouses, useCreateMovement, useProducts } from '@/hooks/use-inventory';
+import { useAuthStore } from '@/stores/auth-store';
+import { MovementType, CreateStockMovementDto } from '@repo/dto';
+import { Package, Plus, MapPin, Search } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 
-// Mock stock data
-const stockItems = [
-    { id: '1', sku: 'GEAR-001', name: 'Industrial Gears Set', warehouse: 'Main Warehouse', quantity: 156, minStock: 50, maxStock: 500, lastUpdated: '2024-01-31' },
-    { id: '2', sku: 'BEAR-002', name: 'Steel Ball Bearings', warehouse: 'Main Warehouse', quantity: 320, minStock: 100, maxStock: 800, lastUpdated: '2024-01-30' },
-    { id: '3', sku: 'PUMP-003', name: 'Hydraulic Pump Unit', warehouse: 'Storage B', quantity: 28, minStock: 20, maxStock: 100, lastUpdated: '2024-01-29' },
-    { id: '4', sku: 'BOLT-004', name: 'Stainless Steel Bolts', warehouse: 'Main Warehouse', quantity: 1200, minStock: 500, maxStock: 2000, lastUpdated: '2024-01-31' },
-    { id: '5', sku: 'MOTR-005', name: 'Electric Motor 3HP', warehouse: 'Storage B', quantity: 12, minStock: 15, maxStock: 60, lastUpdated: '2024-01-28' },
-    { id: '6', sku: 'CONV-006', name: 'Conveyor Belt 10m', warehouse: 'Main Warehouse', quantity: 8, minStock: 10, maxStock: 30, lastUpdated: '2024-01-27' },
-];
-
-function getStockStatus(qty: number, min: number, max: number) {
-    if (qty <= min) return { label: 'Low Stock', color: 'error', icon: TrendingDown };
-    if (qty >= max * 0.9) return { label: 'High Stock', color: 'warning', icon: TrendingUp };
-    return { label: 'Normal', color: 'success', icon: Package };
+// Interface for Form
+interface InboundForm {
+    warehouseId: string;
+    productVariantId: string;
+    quantity: number;
+    batchCode?: string;
 }
 
 export default function StockPage() {
+    const { user } = useAuthStore();
+    const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>('');
     const [search, setSearch] = useState('');
-    const [warehouse, setWarehouse] = useState('All');
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const warehouses = ['All', ...new Set(stockItems.map((s) => s.warehouse))];
+    const { data: warehouses } = useWarehouses();
+    const { data: stocks, isLoading } = useStockLevels(selectedWarehouseId, search);
+    const { data: products } = useProducts();
 
-    const filtered = stockItems.filter((s) => {
-        const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) || s.sku.toLowerCase().includes(search.toLowerCase());
-        const matchWarehouse = warehouse === 'All' || s.warehouse === warehouse;
-        return matchSearch && matchWarehouse;
-    });
+    const createMovement = useCreateMovement();
+    const { register, handleSubmit, reset } = useForm<InboundForm>();
 
-    const lowStock = stockItems.filter((s) => s.quantity <= s.minStock).length;
+    const onSubmit = (data: InboundForm) => {
+        const dto: CreateStockMovementDto = {
+            type: MovementType.INBOUND,
+            toWarehouseId: data.warehouseId,
+            reference: 'Manual Inbound',
+            items: [
+                {
+                    productVariantId: data.productVariantId,
+                    quantity: Number(data.quantity),
+                    batchCode: data.batchCode || undefined
+                }
+            ]
+        };
+
+        createMovement.mutate(dto, {
+            onSuccess: () => {
+                setIsModalOpen(false);
+                reset();
+            }
+        });
+    };
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-8 animate-fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[rgb(var(--foreground))]">Stock Levels</h1>
-                    <p className="text-[rgb(var(--muted))]">Monitor inventory across warehouses</p>
+                    <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">Stock Management</h1>
+                    <p className="text-[rgb(var(--muted))] mt-1">Manage inventory across warehouses</p>
                 </div>
-                {lowStock > 0 && (
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgb(var(--error))]/10 text-[rgb(var(--error))]">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span className="text-sm font-medium">{lowStock} items low on stock</span>
-                    </div>
-                )}
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 bg-[rgb(var(--primary))] text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                >
+                    <Plus className="w-4 h-4" />
+                    Inbound Stock
+                </button>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
+            <div className="glass-card p-4 flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[rgb(var(--muted))]" />
                     <input
                         type="text"
-                        placeholder="Search by SKU or name..."
+                        placeholder="Search products..."
+                        className="w-full bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[rgb(var(--primary))]"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-[rgb(var(--surface-elevated))] border border-[rgb(var(--border))] text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))]"
                     />
                 </div>
-                <select
-                    value={warehouse}
-                    onChange={(e) => setWarehouse(e.target.value)}
-                    className="px-4 py-2 rounded-lg bg-[rgb(var(--surface-elevated))] border border-[rgb(var(--border))] text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] cursor-pointer"
-                >
-                    {warehouses.map((w) => (
-                        <option key={w} value={w}>{w === 'All' ? 'All Warehouses' : w}</option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Stock Table */}
-            <div className="glass-card overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-[rgb(var(--border))] bg-[rgb(var(--surface-elevated))]">
-                                <th className="text-left py-3 px-4 text-sm font-medium text-[rgb(var(--muted))]">SKU</th>
-                                <th className="text-left py-3 px-4 text-sm font-medium text-[rgb(var(--muted))]">Product</th>
-                                <th className="text-left py-3 px-4 text-sm font-medium text-[rgb(var(--muted))]">Warehouse</th>
-                                <th className="text-left py-3 px-4 text-sm font-medium text-[rgb(var(--muted))]">Quantity</th>
-                                <th className="text-left py-3 px-4 text-sm font-medium text-[rgb(var(--muted))]">Status</th>
-                                <th className="text-left py-3 px-4 text-sm font-medium text-[rgb(var(--muted))]">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.map((item) => {
-                                const status = getStockStatus(item.quantity, item.minStock, item.maxStock);
-                                const StatusIcon = status.icon;
-
-                                return (
-                                    <tr key={item.id} className="border-b border-[rgb(var(--border))] last:border-0 hover:bg-[rgb(var(--surface-elevated))]/50">
-                                        <td className="py-3 px-4 text-sm font-mono">{item.sku}</td>
-                                        <td className="py-3 px-4 text-sm">{item.name}</td>
-                                        <td className="py-3 px-4 text-sm text-[rgb(var(--muted))]">{item.warehouse}</td>
-                                        <td className="py-3 px-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium">{item.quantity}</span>
-                                                <span className="text-xs text-[rgb(var(--muted))]">/ {item.maxStock}</span>
-                                            </div>
-                                            {/* Progress bar */}
-                                            <div className="w-24 h-1 bg-[rgb(var(--border))] rounded-full mt-1">
-                                                <div
-                                                    className={`h-full rounded-full bg-[rgb(var(--${status.color}))]`}
-                                                    style={{ width: `${Math.min((item.quantity / item.maxStock) * 100, 100)}%` }}
-                                                />
-                                            </div>
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-[rgb(var(--${status.color}))]/10 text-[rgb(var(--${status.color}))]`}>
-                                                <StatusIcon className="w-3 h-3" />
-                                                {status.label}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            <div className="flex gap-2">
-                                                <button className="p-1.5 rounded-lg hover:bg-[rgb(var(--surface-elevated))] transition-colors cursor-pointer" title="View">
-                                                    <Eye className="w-4 h-4 text-[rgb(var(--muted))]" />
-                                                </button>
-                                                <button className="p-1.5 rounded-lg hover:bg-[rgb(var(--surface-elevated))] transition-colors cursor-pointer" title="Edit">
-                                                    <Edit2 className="w-4 h-4 text-[rgb(var(--muted))]" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                <div className="w-full md:w-64">
+                    <select
+                        className="w-full bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[rgb(var(--primary))]"
+                        value={selectedWarehouseId}
+                        onChange={(e) => setSelectedWarehouseId(e.target.value)}
+                    >
+                        <option value="">All Warehouses</option>
+                        {warehouses?.map(w => (
+                            <option key={w.id} value={w.id}>{w.name}</option>
+                        ))}
+                    </select>
                 </div>
             </div>
 
-            {/* Empty State */}
-            {filtered.length === 0 && (
-                <div className="text-center py-12">
-                    <Package className="w-12 h-12 mx-auto text-[rgb(var(--muted))] mb-4" />
-                    <p className="text-[rgb(var(--muted))]">No stock items found</p>
+            {/* Stock List */}
+            <div className="glass-card overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-[rgb(var(--muted))]/10">
+                        <tr>
+                            <th className="p-4 text-xs font-medium text-[rgb(var(--muted))] uppercase">Product</th>
+                            <th className="p-4 text-xs font-medium text-[rgb(var(--muted))] uppercase">SKU</th>
+                            <th className="p-4 text-xs font-medium text-[rgb(var(--muted))] uppercase">Warehouse</th>
+                            <th className="p-4 text-xs font-medium text-[rgb(var(--muted))] uppercase text-right">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[rgb(var(--border))]">
+                        {isLoading ? (
+                            <tr><td colSpan={4} className="p-8 text-center text-[rgb(var(--muted))]">Loading stocks...</td></tr>
+                        ) : stocks?.length === 0 ? (
+                            <tr><td colSpan={4} className="p-8 text-center text-[rgb(var(--muted))]">No stock found.</td></tr>
+                        ) : (
+                            stocks?.map((stock, i) => (
+                                <tr key={i} className="hover:bg-[rgb(var(--muted))]/5 transition-colors">
+                                    <td className="p-4">
+                                        <div className="font-medium">{stock.productName}</div>
+                                        <div className="text-xs text-[rgb(var(--muted))]">{stock.variantName}</div>
+                                    </td>
+                                    <td className="p-4 text-sm font-mono text-[rgb(var(--muted))]">{stock.sku}</td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <MapPin className="w-3 h-3 text-[rgb(var(--muted))]" />
+                                            {warehouses?.find(w => w.id === stock.warehouseId)?.name || 'Unknown'}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-right font-semibold">{stock.quantity}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-[rgb(var(--background))] glass-card w-full max-w-md p-6 rounded-xl shadow-2xl animate-fade-in relative">
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="absolute top-4 right-4 text-[rgb(var(--muted))] hover:text-[rgb(var(--foreground))]"
+                        >
+                            ✕
+                        </button>
+                        <h2 className="text-xl font-bold mb-4">Inbound Stock</h2>
+
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Warehouse</label>
+                                <select
+                                    {...register('warehouseId', { required: true })}
+                                    className="w-full bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg px-3 py-2 text-sm"
+                                >
+                                    {warehouses?.map(w => (
+                                        <option key={w.id} value={w.id}>{w.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Product Variant</label>
+                                <select
+                                    {...register('productVariantId', { required: true })}
+                                    className="w-full bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg px-3 py-2 text-sm"
+                                >
+                                    <option value="">Select Product...</option>
+                                    {products?.map(p => (
+                                        p.variants.map(v => (
+                                            <option key={v.id} value={v.id}>{v.name} ({v.sku})</option>
+                                        ))
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Quantity</label>
+                                    <input
+                                        type="number"
+                                        step="any"
+                                        {...register('quantity', { required: true, min: 0.0001 })}
+                                        className="w-full bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg px-3 py-2 text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Batch Code (Optional)</label>
+                                    <input
+                                        type="text"
+                                        {...register('batchCode')}
+                                        className="w-full bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg px-3 py-2 text-sm"
+                                        placeholder="e.g. LOT-123"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-4 py-2 rounded-lg border border-[rgb(var(--border))] hover:bg-[rgb(var(--muted))]/10"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={createMovement.isPending}
+                                    className="px-4 py-2 rounded-lg bg-[rgb(var(--primary))] text-white hover:opacity-90 disabled:opacity-50"
+                                >
+                                    {createMovement.isPending ? 'Processing...' : 'Confirm Inbound'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

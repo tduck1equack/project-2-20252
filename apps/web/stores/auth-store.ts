@@ -1,15 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-
-export type UserRole = 'CUSTOMER' | 'EMPLOYEE' | 'MANAGER' | 'ADMIN' | 'ACCOUNTANT';
-
-export interface User {
-    id: string;
-    email: string;
-    name: string | null;
-    role: UserRole;
-    tenantId: string | null;
-}
+import { User, UserRole } from '@repo/dto';
+export type { User, UserRole };
 
 interface AuthState {
     user: User | null;
