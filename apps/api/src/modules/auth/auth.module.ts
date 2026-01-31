@@ -7,15 +7,18 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from '@repo/config';
 import { AuthController } from './auth.controller';
-import { PrismaService } from '../infrastructure/prisma/prisma.service';
 import { TokenBlacklistService } from '../infrastructure/redis/token-blacklist.service';
 import { RolesGuard } from './guards/roles.guard';
 import { WsAuthGuard } from './guards/ws-auth.guard';
+import { UserRepository } from './repositories/user.repository';
+import { RefreshTokenRepository } from './repositories/refresh-token.repository';
+import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 
 @Module({
     imports: [
         PassportModule,
-        ConfigModule, // For ConfigService in WsAuthGuard
+        ConfigModule,
+        InfrastructureModule, // For PrismaService
         JwtModule.register({
             secret: env.JWT_SECRET,
             signOptions: { expiresIn: '15m' },
@@ -26,12 +29,13 @@ import { WsAuthGuard } from './guards/ws-auth.guard';
         AuthService,
         LocalStrategy,
         JwtStrategy,
-        PrismaService,
         TokenBlacklistService,
         RolesGuard,
-        WsAuthGuard, // Register as provider
+        WsAuthGuard,
+        // Repositories
+        UserRepository,
+        RefreshTokenRepository,
     ],
-    exports: [AuthService, RolesGuard, WsAuthGuard, JwtModule], // Export JwtModule for JwtService access
+    exports: [AuthService, RolesGuard, WsAuthGuard, JwtModule],
 })
 export class AuthModule { }
-

@@ -1,31 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { OrderRepository } from '../repositories/order.repository';
+import { Role } from '@repo/database';
 
 @Injectable()
 export class GetOrdersUseCase {
-    constructor(private prisma: PrismaService) { }
+    constructor(private orderRepository: OrderRepository) { }
 
-    async execute(tenantId: string, userId: string, role: string, filters?: any) {
-        // If Customer, force userId filter
-        const where: any = { tenantId };
-
-        if (role === 'CUSTOMER') {
-            where.customerId = userId;
+    async execute(tenantId: string, userId: string, role: string) {
+        // Customer sees only their orders; Manager/Admin sees all
+        if (role === Role.CUSTOMER) {
+            return this.orderRepository.findByCustomer(tenantId, userId);
         }
-
-        return this.prisma.salesOrder.findMany({
-            where,
-            include: {
-                items: {
-                    include: {
-                        productVariant: true
-                    }
-                },
-                customer: {
-                    select: { name: true, email: true }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        return this.orderRepository.findByTenant(tenantId);
     }
 }

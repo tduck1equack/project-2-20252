@@ -1,19 +1,19 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { OrderRepository } from '../repositories/order.repository';
 import { EInvoiceService } from '../../einvoice/services/einvoice.service';
 import { OrderStatus } from '@repo/database';
 
 @Injectable()
 export class UpdateOrderStatusUseCase {
     constructor(
-        private prisma: PrismaService,
+        private orderRepository: OrderRepository,
         private invoiceService: EInvoiceService
     ) { }
 
     async execute(tenantId: string, orderId: string, newStatus: OrderStatus) {
-        const order = await this.prisma.salesOrder.findUnique({
-            where: { id: orderId },
-            include: { items: { include: { productVariant: true } }, customer: true }
+        const order = await this.orderRepository.findById(orderId, {
+            items: { include: { productVariant: true } },
+            customer: true
         });
 
         if (!order || order.tenantId !== tenantId) {
@@ -26,22 +26,19 @@ export class UpdateOrderStatusUseCase {
             throw new BadRequestException(`Cannot update order in ${current} status`);
         }
 
-        const updated = await this.prisma.salesOrder.update({
-            where: { id: orderId },
-            data: { status: newStatus }
-        });
+        const updated = await this.orderRepository.updateStatus(orderId, newStatus);
 
-        // Trigger Invoice if SHIPPED (Completed)
+        // Trigger Invoice if SHIPPED
         if (newStatus === OrderStatus.SHIPPED) {
             try {
                 await this.invoiceService.publishInvoice(tenantId, {
                     transactionRef: order.code,
                     taxCode: '',
-                    customerName: order.customer?.name || 'Customer',
+                    customerName: (order as any).customer?.name || 'Customer',
                     customerAddress: '',
                     totalAmount: Number(order.totalAmount),
                     vatAmount: 0,
-                    items: order.items.map(i => ({
+                    items: (order as any).items.map((i: any) => ({
                         name: i.productVariant.name,
                         unit: 'pcs',
                         quantity: i.quantity,

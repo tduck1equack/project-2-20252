@@ -32,6 +32,9 @@ export type {
     Stock,
     StockMovement,
     StockMovementItem,
+    RefreshToken,
+    SalesOrder,
+    SalesOrderItem,
 } from '@prisma/client';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
