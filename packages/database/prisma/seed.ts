@@ -1,319 +1,197 @@
-import { PrismaClient, Role, MovementType, MovementStatus, AccountType } from '@prisma/client';
+import { PrismaClient, Role, OrderStatus, MovementType, MovementStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import * as dotenv from 'dotenv';
-import path from 'path';
-
-// Load env from root
-dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 const prisma = new PrismaClient();
 
 async function main() {
     console.log('🌱 Seeding database...');
 
-    // Clear existing data (in reverse dependency order)
-    await prisma.stockMovementItem.deleteMany();
-    await prisma.stockMovement.deleteMany();
-    await prisma.stock.deleteMany();
-    await prisma.batch.deleteMany();
-    await prisma.productVariant.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.uom.deleteMany();
-    await prisma.journalEntryLine.deleteMany();
-    await prisma.journalEntry.deleteMany();
-    await prisma.account.deleteMany();
-    await prisma.warehouse.deleteMany();
-    await prisma.refreshToken.deleteMany();
-    await prisma.eInvoiceLog.deleteMany();
-    await prisma.eInvoiceProviderConfig.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.tenant.deleteMany();
-
-    console.log('✓ Cleared existing data');
-
-    // Create Tenant
-    const tenant = await prisma.tenant.create({
-        data: {
-            name: 'Demo Company',
-        },
+    // 1. Create Demo Tenant
+    const tenant = await prisma.tenant.upsert({
+        where: { id: 'demo-tenant' },
+        update: {},
+        create: {
+            id: 'demo-tenant',
+            name: 'Demo Company'
+        }
     });
-    console.log('✓ Created tenant:', tenant.name);
+    console.log('✅ Tenant created:', tenant.name);
 
-    // Create Users
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    // 2. Create Users
+    const passwordHash = await bcrypt.hash('password123', 10);
 
-    const users = await Promise.all([
-        prisma.user.create({
-            data: {
-                email: 'admin@example.com',
-                password: hashedPassword,
-                name: 'Admin User',
-                role: Role.ADMIN,
-                tenantId: tenant.id,
-            },
-        }),
-        prisma.user.create({
-            data: {
-                email: 'manager@example.com',
-                password: hashedPassword,
-                name: 'Nguyen Van A',
-                role: Role.MANAGER,
-                tenantId: tenant.id,
-            },
-        }),
-        prisma.user.create({
-            data: {
-                email: 'employee@example.com',
-                password: hashedPassword,
-                name: 'Tran Thi B',
-                role: Role.EMPLOYEE,
-                tenantId: tenant.id,
-            },
-        }),
-        prisma.user.create({
-            data: {
-                email: 'accountant@example.com',
-                password: hashedPassword,
-                name: 'Le Van C',
-                role: Role.ACCOUNTANT,
-                tenantId: tenant.id,
-            },
-        }),
-        prisma.user.create({
-            data: {
-                email: 'customer@example.com',
-                password: hashedPassword,
-                name: 'Pham Thi D',
-                role: Role.CUSTOMER,
-                tenantId: tenant.id,
-            },
-        }),
-    ]);
-    console.log('✓ Created', users.length, 'users');
+    const admin = await prisma.user.upsert({
+        where: { email: 'admin@demo.com' },
+        update: {},
+        create: {
+            email: 'admin@demo.com',
+            password: passwordHash,
+            name: 'Admin User',
+            role: Role.ADMIN,
+            tenantId: tenant.id
+        }
+    });
 
-    // Create UOMs
-    const uoms = await Promise.all([
-        prisma.uom.create({ data: { name: 'Piece', code: 'PCS', tenantId: tenant.id } }),
-        prisma.uom.create({ data: { name: 'Kilogram', code: 'KG', tenantId: tenant.id } }),
-        prisma.uom.create({ data: { name: 'Liter', code: 'L', tenantId: tenant.id } }),
-        prisma.uom.create({ data: { name: 'Meter', code: 'M', tenantId: tenant.id } }),
-        prisma.uom.create({ data: { name: 'Box', code: 'BOX', tenantId: tenant.id } }),
-    ]);
-    console.log('✓ Created', uoms.length, 'UOMs');
+    const manager = await prisma.user.upsert({
+        where: { email: 'manager@demo.com' },
+        update: {},
+        create: {
+            email: 'manager@demo.com',
+            password: passwordHash,
+            name: 'Manager User',
+            role: Role.MANAGER,
+            tenantId: tenant.id
+        }
+    });
 
-    // Create Warehouses
-    const warehouses = await Promise.all([
-        prisma.warehouse.create({
-            data: {
-                name: 'Main Warehouse',
-                location: '123 Industrial Zone, District 7, Ho Chi Minh City',
-                tenantId: tenant.id,
-            },
-        }),
-        prisma.warehouse.create({
-            data: {
-                name: 'Storage B',
-                location: '456 Logistics Park, Thu Duc, Ho Chi Minh City',
-                tenantId: tenant.id,
-            },
-        }),
-        prisma.warehouse.create({
-            data: {
-                name: 'Cold Storage',
-                location: '789 Food District, Binh Tan, Ho Chi Minh City',
-                tenantId: tenant.id,
-            },
-        }),
-    ]);
-    console.log('✓ Created', warehouses.length, 'warehouses');
+    const customer = await prisma.user.upsert({
+        where: { email: 'customer@demo.com' },
+        update: {},
+        create: {
+            email: 'customer@demo.com',
+            password: passwordHash,
+            name: 'John Customer',
+            role: Role.CUSTOMER,
+            tenantId: tenant.id
+        }
+    });
+    console.log('✅ Users created: admin, manager, customer');
 
-    // Create Products with Variants
-    const productsData = [
-        { name: 'Industrial Gears Set', sku: 'GEAR-001', description: 'Heavy-duty industrial gears for machinery', uom: 'PCS' },
-        { name: 'Steel Ball Bearings', sku: 'BEAR-002', description: 'High-precision ball bearings', uom: 'PCS' },
-        { name: 'Hydraulic Pump Unit', sku: 'PUMP-003', description: 'Industrial hydraulic pump system', uom: 'PCS' },
-        { name: 'Stainless Steel Bolts', sku: 'BOLT-004', description: 'M10 stainless steel bolts', uom: 'BOX' },
-        { name: 'Electric Motor 3HP', sku: 'MOTR-005', description: '3HP electric motor with capacitor', uom: 'PCS' },
-        { name: 'Conveyor Belt 10m', sku: 'CONV-006', description: 'Heavy-duty rubber conveyor belt', uom: 'M' },
-        { name: 'Lubricant Oil 5L', sku: 'LUBE-007', description: 'Industrial grade lubricant oil', uom: 'L' },
-        { name: 'Paint Thinner 1L', sku: 'PAIN-008', description: 'Solvent-based paint thinner', uom: 'L' },
+    // 3. Create UoM
+    const uom = await prisma.uom.upsert({
+        where: { code: 'PCS' },
+        update: {},
+        create: {
+            code: 'PCS',
+            name: 'Pieces',
+            tenantId: tenant.id
+        }
+    });
+
+    // 4. Create Warehouse
+    const warehouse = await prisma.warehouse.upsert({
+        where: { id: 'demo-warehouse' },
+        update: {},
+        create: {
+            id: 'demo-warehouse',
+            name: 'Main Warehouse',
+            location: 'Ho Chi Minh City',
+            tenantId: tenant.id
+        }
+    });
+    console.log('✅ Warehouse created:', warehouse.name);
+
+    // 5. Create Products with Variants
+    const products = [
+        {
+            name: 'Laptop', sku: 'LAPTOP-001', variants: [
+                { name: 'Laptop - 15 inch', sku: 'LAPTOP-15', price: 999.99 },
+                { name: 'Laptop - 17 inch', sku: 'LAPTOP-17', price: 1299.99 }
+            ]
+        },
+        {
+            name: 'Mouse', sku: 'MOUSE-001', variants: [
+                { name: 'Mouse - Wireless', sku: 'MOUSE-WL', price: 29.99 },
+                { name: 'Mouse - Wired', sku: 'MOUSE-WD', price: 19.99 }
+            ]
+        },
+        {
+            name: 'Keyboard', sku: 'KB-001', variants: [
+                { name: 'Keyboard - Mechanical', sku: 'KB-MECH', price: 89.99 },
+                { name: 'Keyboard - Membrane', sku: 'KB-MEMB', price: 29.99 }
+            ]
+        },
+        {
+            name: 'Monitor', sku: 'MON-001', variants: [
+                { name: 'Monitor - 24 inch', sku: 'MON-24', price: 249.99 },
+                { name: 'Monitor - 27 inch', sku: 'MON-27', price: 349.99 }
+            ]
+        },
+        {
+            name: 'Headphones', sku: 'HP-001', variants: [
+                { name: 'Headphones - Wired', sku: 'HP-WD', price: 49.99 },
+                { name: 'Headphones - Bluetooth', sku: 'HP-BT', price: 99.99 }
+            ]
+        }
     ];
 
-    const pcsUom = uoms.find(u => u.code === 'PCS')!;
-    const boxUom = uoms.find(u => u.code === 'BOX')!;
-    const mUom = uoms.find(u => u.code === 'M')!;
-    const lUom = uoms.find(u => u.code === 'L')!;
+    const createdVariants: { id: string; name: string }[] = [];
 
-    const uomMap: Record<string, string> = {
-        PCS: pcsUom.id,
-        BOX: boxUom.id,
-        M: mUom.id,
-        L: lUom.id,
-    };
-
-    const products = [];
-    const variants = [];
-
-    for (const p of productsData) {
-        const product = await prisma.product.create({
-            data: {
+    for (const p of products) {
+        const product = await prisma.product.upsert({
+            where: { sku: p.sku },
+            update: {},
+            create: {
                 name: p.name,
                 sku: p.sku,
-                description: p.description,
-                uomId: uomMap[p.uom],
+                uomId: uom.id,
                 tenantId: tenant.id,
+                variants: {
+                    create: p.variants.map(v => ({
+                        name: v.name,
+                        sku: v.sku,
+                        price: v.price
+                    }))
+                }
             },
+            include: { variants: true }
         });
-        products.push(product);
-
-        // Create default variant
-        const variant = await prisma.productVariant.create({
-            data: {
-                name: `${p.name} - Standard`,
-                sku: `${p.sku}-STD`,
-                productId: product.id,
-            },
-        });
-        variants.push(variant);
+        createdVariants.push(...product.variants.map(v => ({ id: v.id, name: v.name })));
     }
-    console.log('✓ Created', products.length, 'products with variants');
+    console.log('✅ Products created:', products.length);
 
-    // Create Batches (for products with expiry)
-    const lubricantVariant = variants.find(v => v.sku === 'LUBE-007-STD')!;
-    const thinnerVariant = variants.find(v => v.sku === 'PAIN-008-STD')!;
-
-    const batches = await Promise.all([
-        prisma.batch.create({
-            data: {
-                code: 'LOT-2024-A01',
-                productVariantId: lubricantVariant.id,
-                manufacturingDate: new Date('2023-06-01'),
-                expiryDate: new Date('2025-06-01'),
+    // 6. Create Stock
+    for (const variant of createdVariants) {
+        await prisma.stock.upsert({
+            where: {
+                warehouseId_productVariantId_batchId: {
+                    warehouseId: warehouse.id,
+                    productVariantId: variant.id,
+                    batchId: null as any
+                }
             },
-        }),
-        prisma.batch.create({
-            data: {
-                code: 'LOT-2024-D04',
-                productVariantId: thinnerVariant.id,
-                manufacturingDate: new Date('2023-12-15'),
-                expiryDate: new Date('2024-06-15'),
-            },
-        }),
-    ]);
-    console.log('✓ Created', batches.length, 'batches');
-
-    // Create Stock records
-    const stockData = [
-        { variant: 'GEAR-001-STD', warehouse: 'Main Warehouse', quantity: 156 },
-        { variant: 'BEAR-002-STD', warehouse: 'Main Warehouse', quantity: 320 },
-        { variant: 'PUMP-003-STD', warehouse: 'Storage B', quantity: 28 },
-        { variant: 'BOLT-004-STD', warehouse: 'Main Warehouse', quantity: 1200 },
-        { variant: 'MOTR-005-STD', warehouse: 'Storage B', quantity: 12 },
-        { variant: 'CONV-006-STD', warehouse: 'Main Warehouse', quantity: 8 },
-        { variant: 'LUBE-007-STD', warehouse: 'Storage B', quantity: 50, batch: 'LOT-2024-A01' },
-        { variant: 'PAIN-008-STD', warehouse: 'Storage B', quantity: 30, batch: 'LOT-2024-D04' },
-    ];
-
-    for (const s of stockData) {
-        const variant = variants.find(v => v.sku === s.variant);
-        const warehouse = warehouses.find(w => w.name === s.warehouse);
-        const batch = s.batch ? batches.find(b => b.code === s.batch) : null;
-
-        await prisma.stock.create({
-            data: {
-                productVariantId: variant!.id,
-                warehouseId: warehouse!.id,
-                quantity: s.quantity,
-                batchId: batch?.id,
-            },
+            update: { quantity: Math.floor(Math.random() * 100) + 10 },
+            create: {
+                warehouseId: warehouse.id,
+                productVariantId: variant.id,
+                quantity: Math.floor(Math.random() * 100) + 10
+            }
         });
     }
-    console.log('✓ Created stock records');
+    console.log('✅ Stock levels created');
 
-    // Create Stock Movements
-    const employee = users.find(u => u.role === Role.EMPLOYEE)!;
+    // 7. Create Sample Orders
+    const orderStatuses = [OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.SHIPPED];
+    for (let i = 0; i < 10; i++) {
+        const items = createdVariants.slice(0, Math.floor(Math.random() * 3) + 1).map(v => ({
+            productVariantId: v.id,
+            quantity: Math.floor(Math.random() * 5) + 1,
+            unitPrice: Math.random() * 100 + 20,
+            totalPrice: 0
+        }));
+        items.forEach(item => { item.totalPrice = item.unitPrice * item.quantity; });
+        const totalAmount = items.reduce((acc, item) => acc + item.totalPrice, 0);
 
-    const movements = await Promise.all([
-        prisma.stockMovement.create({
+        await prisma.salesOrder.create({
             data: {
-                code: 'MOV-2024-001',
-                type: MovementType.INBOUND,
-                status: MovementStatus.COMPLETED,
-                date: new Date('2024-01-31'),
-                reference: 'PO-2024-001',
-                toWarehouseId: warehouses[0].id,
+                code: `SO-DEMO-${1000 + i}`,
                 tenantId: tenant.id,
-                createdById: employee.id,
-                items: {
-                    create: [
-                        { productVariantId: variants[0].id, quantity: 100 },
-                    ],
-                },
-            },
-        }),
-        prisma.stockMovement.create({
-            data: {
-                code: 'MOV-2024-002',
-                type: MovementType.OUTBOUND,
-                status: MovementStatus.COMPLETED,
-                date: new Date('2024-01-31'),
-                reference: 'SO-2024-001',
-                fromWarehouseId: warehouses[0].id,
-                tenantId: tenant.id,
-                createdById: employee.id,
-                items: {
-                    create: [
-                        { productVariantId: variants[1].id, quantity: 50 },
-                    ],
-                },
-            },
-        }),
-        prisma.stockMovement.create({
-            data: {
-                code: 'MOV-2024-003',
-                type: MovementType.TRANSFER,
-                status: MovementStatus.DRAFT,
-                date: new Date('2024-01-30'),
-                fromWarehouseId: warehouses[1].id,
-                toWarehouseId: warehouses[0].id,
-                tenantId: tenant.id,
-                createdById: employee.id,
-                items: {
-                    create: [
-                        { productVariantId: variants[2].id, quantity: 10 },
-                    ],
-                },
-            },
-        }),
-    ]);
-    console.log('✓ Created', movements.length, 'stock movements');
+                customerId: customer.id,
+                status: orderStatuses[i % orderStatuses.length],
+                totalAmount,
+                items: { create: items },
+                createdAt: new Date(Date.now() - (i * 24 * 60 * 60 * 1000)) // spread over days
+            }
+        });
+    }
+    console.log('✅ Sample orders created: 10');
 
-    // Create Chart of Accounts (VAS - selected)
-    const accounts = await Promise.all([
-        prisma.account.create({ data: { code: '111', name: 'Tiền mặt', type: AccountType.ASSET, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '112', name: 'Tiền gửi ngân hàng', type: AccountType.ASSET, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '131', name: 'Phải thu của khách hàng', type: AccountType.ASSET, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '152', name: 'Nguyên liệu, vật liệu', type: AccountType.ASSET, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '156', name: 'Hàng hóa', type: AccountType.ASSET, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '331', name: 'Phải trả cho người bán', type: AccountType.LIABILITY, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '411', name: 'Vốn đầu tư của chủ sở hữu', type: AccountType.EQUITY, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '511', name: 'Doanh thu bán hàng', type: AccountType.REVENUE, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '632', name: 'Giá vốn hàng bán', type: AccountType.EXPENSE, tenantId: tenant.id } }),
-        prisma.account.create({ data: { code: '642', name: 'Chi phí quản lý doanh nghiệp', type: AccountType.EXPENSE, tenantId: tenant.id } }),
-    ]);
-    console.log('✓ Created', accounts.length, 'accounts');
-
-    console.log('\n✅ Database seeded successfully!');
-    console.log('\n📋 Test credentials:');
-    console.log('   admin@example.com / password123');
-    console.log('   manager@example.com / password123');
-    console.log('   employee@example.com / password123');
-    console.log('   customer@example.com / password123');
+    console.log('🎉 Seeding complete!');
 }
 
 main()
     .catch((e) => {
-        console.error('❌ Seed failed:', e);
+        console.error(e);
         process.exit(1);
     })
     .finally(async () => {

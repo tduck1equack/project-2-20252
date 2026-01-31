@@ -12,6 +12,7 @@ export {
     JournalStatus,
     Role,
     EInvoiceStatus,
+    OrderStatus,
 } from '@prisma/client';
 
 // Type exports from Prisma

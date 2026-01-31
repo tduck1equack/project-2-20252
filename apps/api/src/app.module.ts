@@ -10,6 +10,7 @@ import { EInvoiceModule } from './modules/einvoice/einvoice.module';
 import { InfrastructureModule } from './modules/infrastructure/infrastructure.module';
 import { SharedModule } from './modules/shared/shared.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SalesModule } from './modules/sales/sales.module';
     AccountingModule,
     EInvoiceModule,
     SalesModule,
+    ReportsModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],

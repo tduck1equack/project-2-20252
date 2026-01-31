@@ -1,131 +1,181 @@
 'use client';
 
-import { FileText, Download, Calendar, TrendingUp, Package, Truck, DollarSign } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
+import {
+    BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+} from 'recharts';
+import { TrendingUp, Package, DollarSign, AlertTriangle, Loader2 } from 'lucide-react';
 
-const reports = [
-    {
-        id: '1',
-        name: 'Inventory Summary Report',
-        description: 'Current stock levels across all warehouses',
-        icon: Package,
-        color: 'primary',
-        lastGenerated: '2024-01-31',
-    },
-    {
-        id: '2',
-        name: 'Stock Movement Report',
-        description: 'Inbound, outbound, and transfer activities',
-        icon: Truck,
-        color: 'accent',
-        lastGenerated: '2024-01-30',
-    },
-    {
-        id: '3',
-        name: 'Financial Summary',
-        description: 'Revenue and cost analysis',
-        icon: DollarSign,
-        color: 'success',
-        lastGenerated: '2024-01-29',
-    },
-    {
-        id: '4',
-        name: 'Trend Analysis',
-        description: 'Stock trends and demand forecasting',
-        icon: TrendingUp,
-        color: 'warning',
-        lastGenerated: '2024-01-28',
-    },
-];
+const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
 export default function ReportsPage() {
+    const { data: velocity, isLoading: loadingVelocity } = useQuery({
+        queryKey: ['reports', 'stock-velocity'],
+        queryFn: async () => {
+            const res = await api.get('/reports/stock-velocity?limit=10');
+            return res.data || res;
+        }
+    });
+
+    const { data: sales, isLoading: loadingSales } = useQuery({
+        queryKey: ['reports', 'sales-summary'],
+        queryFn: async () => {
+            const res = await api.get('/reports/sales-summary?days=30');
+            return res.data || res;
+        }
+    });
+
+    const { data: stockSummary, isLoading: loadingStock } = useQuery({
+        queryKey: ['reports', 'stock-summary'],
+        queryFn: async () => {
+            const res = await api.get('/reports/stock-summary');
+            return res.data || res;
+        }
+    });
+
+    const isLoading = loadingVelocity || loadingSales || loadingStock;
+
+    const orderStatusData = sales?.ordersByStatus
+        ? Object.entries(sales.ordersByStatus).map(([name, value]) => ({ name, value }))
+        : [];
+
     return (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-8 animate-fade-in">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-[rgb(var(--foreground))]">Reports</h1>
-                <p className="text-[rgb(var(--muted))]">Generate and download business reports</p>
+                <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">Reports & Analytics</h1>
+                <p className="text-[rgb(var(--muted))] mt-1">Business insights at a glance</p>
             </div>
 
-            {/* Reports Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {reports.map((report) => {
-                    const Icon = report.icon;
-
-                    return (
-                        <div key={report.id} className="glass-card p-6 stat-card">
-                            <div className="flex items-start gap-4">
-                                <div className={`w-12 h-12 rounded-xl bg-[rgb(var(--${report.color}))]/10 flex items-center justify-center shrink-0`}>
-                                    <Icon className={`w-6 h-6 text-[rgb(var(--${report.color}))]`} />
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="font-semibold text-[rgb(var(--foreground))]">{report.name}</h3>
-                                    <p className="text-sm text-[rgb(var(--muted))] mt-1">{report.description}</p>
-                                    <div className="flex items-center gap-1 mt-2 text-xs text-[rgb(var(--muted))]">
-                                        <Calendar className="w-3 h-3" />
-                                        Last generated: {report.lastGenerated}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-2 mt-4 pt-4 border-t border-[rgb(var(--border))]">
-                                <button className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[rgb(var(--surface-elevated))] hover:bg-[rgb(var(--border))] transition-colors text-sm font-medium cursor-pointer">
-                                    <FileText className="w-4 h-4" />
-                                    View
-                                </button>
-                                <button className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[rgb(var(--primary))] text-white hover:opacity-90 transition-opacity text-sm font-medium cursor-pointer">
-                                    <Download className="w-4 h-4" />
-                                    Download
-                                </button>
-                            </div>
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="glass-card p-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[rgb(var(--success))]/10 rounded-xl flex items-center justify-center">
+                            <DollarSign className="w-6 h-6 text-[rgb(var(--success))]" />
                         </div>
-                    );
-                })}
-            </div>
-
-            {/* Custom Report Section */}
-            <div className="glass-card p-6">
-                <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4">Generate Custom Report</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                            Report Type
-                        </label>
-                        <select className="w-full px-4 py-2 rounded-lg bg-[rgb(var(--surface-elevated))] border border-[rgb(var(--border))] text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] cursor-pointer">
-                            <option>Inventory Summary</option>
-                            <option>Stock Movement</option>
-                            <option>Financial Summary</option>
-                            <option>Trend Analysis</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                            Date Range
-                        </label>
-                        <select className="w-full px-4 py-2 rounded-lg bg-[rgb(var(--surface-elevated))] border border-[rgb(var(--border))] text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] cursor-pointer">
-                            <option>Last 7 days</option>
-                            <option>Last 30 days</option>
-                            <option>Last 90 days</option>
-                            <option>This year</option>
-                            <option>Custom range</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                            Warehouse
-                        </label>
-                        <select className="w-full px-4 py-2 rounded-lg bg-[rgb(var(--surface-elevated))] border border-[rgb(var(--border))] text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] cursor-pointer">
-                            <option>All Warehouses</option>
-                            <option>Main Warehouse</option>
-                            <option>Storage B</option>
-                            <option>Cold Storage</option>
-                        </select>
+                        <div>
+                            <p className="text-sm text-[rgb(var(--muted))]">Total Revenue</p>
+                            <p className="text-2xl font-bold">${sales?.totalRevenue?.toFixed(2) || '0.00'}</p>
+                        </div>
                     </div>
                 </div>
-                <button className="mt-4 inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-[rgb(var(--primary))] to-[rgb(var(--accent))] text-white font-medium hover:opacity-90 transition-opacity cursor-pointer">
-                    <FileText className="w-4 h-4" />
-                    Generate Report
-                </button>
+                <div className="glass-card p-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[rgb(var(--primary))]/10 rounded-xl flex items-center justify-center">
+                            <TrendingUp className="w-6 h-6 text-[rgb(var(--primary))]" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-[rgb(var(--muted))]">Total Orders</p>
+                            <p className="text-2xl font-bold">{sales?.totalOrders || 0}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="glass-card p-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                            <Package className="w-6 h-6 text-blue-500" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-[rgb(var(--muted))]">Stock Value</p>
+                            <p className="text-2xl font-bold">${stockSummary?.totalValue?.toFixed(2) || '0.00'}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="glass-card p-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                            <AlertTriangle className="w-6 h-6 text-yellow-500" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-[rgb(var(--muted))]">Low Stock Items</p>
+                            <p className="text-2xl font-bold">{stockSummary?.lowStockCount || 0}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            {isLoading && (
+                <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-[rgb(var(--muted))]" />
+                </div>
+            )}
+
+            {!isLoading && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Revenue Trend */}
+                    <div className="glass-card p-6">
+                        <h3 className="text-lg font-semibold mb-4">Revenue Trend (30 Days)</h3>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={sales?.revenueByDay || []}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                    <XAxis dataKey="date" tick={{ fill: 'rgb(var(--muted))' }} fontSize={12} />
+                                    <YAxis tick={{ fill: 'rgb(var(--muted))' }} fontSize={12} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'rgb(var(--background))',
+                                            border: '1px solid rgb(var(--border))',
+                                            borderRadius: '8px'
+                                        }}
+                                    />
+                                    <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={false} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Order Status Distribution */}
+                    <div className="glass-card p-6">
+                        <h3 className="text-lg font-semibold mb-4">Order Status Distribution</h3>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={orderStatusData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        label={({ name, value }) => `${name}: ${value}`}
+                                    >
+                                        {orderStatusData.map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Stock Velocity */}
+                    <div className="glass-card p-6 lg:col-span-2">
+                        <h3 className="text-lg font-semibold mb-4">Top Moved Products</h3>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={velocity || []} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                    <XAxis type="number" tick={{ fill: 'rgb(var(--muted))' }} fontSize={12} />
+                                    <YAxis type="category" dataKey="name" width={150} tick={{ fill: 'rgb(var(--muted))' }} fontSize={11} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'rgb(var(--background))',
+                                            border: '1px solid rgb(var(--border))',
+                                            borderRadius: '8px'
+                                        }}
+                                    />
+                                    <Bar dataKey="totalQuantity" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
