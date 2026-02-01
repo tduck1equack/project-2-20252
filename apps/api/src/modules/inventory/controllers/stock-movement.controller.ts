@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { StockMovementService } from '../services/stock-movement.service';
 import { JwtAuthGuard } from '../../auth/guards/auth.guard';
+import { createSuccessResponse, ApiResponseDto } from '@repo/dto';
 
 @ApiTags('Inventory')
 @ApiBearerAuth()
@@ -12,13 +13,15 @@ export class StockMovementController {
 
     @Post()
     @ApiOperation({ summary: 'Create a new stock movement (receipt, issue, transfer)' })
-    create(@Request() req: any, @Body() dto: any) {
-        return this.service.create(req.user.tenantId, req.user.userId, dto);
+    async create(@Request() req: any, @Body() dto: any): Promise<ApiResponseDto<any>> {
+        const movement = await this.service.create(req.user.tenantId, req.user.userId, dto);
+        return createSuccessResponse(movement, 201);
     }
 
     @Get()
     @ApiOperation({ summary: 'Get all stock movements' })
-    findAll(@Request() req: any) {
-        return this.service.findAll(req.user.tenantId);
+    async findAll(@Request() req: any): Promise<ApiResponseDto<any[]>> {
+        const movements = await this.service.findAll(req.user.tenantId);
+        return createSuccessResponse(movements);
     }
 }

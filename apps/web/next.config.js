@@ -1,10 +1,11 @@
-import path from 'path';
+import createNextIntlPlugin from 'next-intl/plugin';
 import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
-const shimPath = path.resolve(__dirname, '../../packages/dto/src/shim.ts');
+const withNextIntl = createNextIntlPlugin('./i18n.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -13,18 +14,19 @@ const nextConfig = {
     // Turbopack config (Next.js 16+ default)
     turbopack: {
         resolveAlias: {
-            '@nestjs/swagger': shimPath,
+            // Relative path from apps/web to packages/dto/src/shim.ts
+            '@nestjs/swagger': '../../packages/dto/src/shim.ts',
         },
     },
 
     // Webpack config (for production builds)
-    webpack: (config) => {
+    webpack: (config, { isServer }) => {
         config.resolve.alias = {
             ...config.resolve.alias,
-            '@nestjs/swagger': shimPath,
+            '@nestjs/swagger': resolve(__dirname, '../../packages/dto/src/shim.ts'),
         };
         return config;
     },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

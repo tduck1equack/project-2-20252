@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, LogIn, AlertCircle, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import { GlobalToolbar } from '@/components/global-toolbar';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -134,32 +135,37 @@ function LoginForm() {
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))] p-4">
+        <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+            {/* Fixed Toolbar */}
+            <div className="fixed top-4 right-4 z-50">
+                <GlobalToolbar />
+            </div>
+
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[rgb(var(--primary))] to-[rgb(var(--accent))] flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-4">
                         <LogIn className="w-8 h-8 text-white" />
                     </div>
-                    <h1 className="text-2xl font-bold text-[rgb(var(--foreground))]">Welcome back</h1>
-                    <p className="text-[rgb(var(--muted))] mt-1">Sign in to your account</p>
+                    <h1 className="text-2xl font-bold">Welcome back</h1>
+                    <p className="text-muted-foreground mt-1">Sign in to your account</p>
                 </div>
 
-                <Suspense fallback={<div className="glass-card p-8 animate-pulse"><div className="h-48 bg-[rgb(var(--surface-elevated))] rounded-lg" /></div>}>
+                <Suspense fallback={<div className="glass-card p-8 animate-pulse"><div className="h-48 bg-secondary rounded-lg" /></div>}>
                     <LoginForm />
                 </Suspense>
 
                 {/* Register Link */}
-                <p className="mt-6 text-center text-sm text-[rgb(var(--muted))]">
-                    Don't have an account?{' '}
-                    <Link href="/register" className="text-[rgb(var(--primary))] hover:underline font-medium">
+                <p className="mt-6 text-center text-sm text-muted-foreground">
+                    Don&apos;t have an account?{' '}
+                    <Link href="/register" className="text-primary hover:underline font-medium">
                         Create one
                     </Link>
                 </p>
 
                 {/* Back to Home */}
                 <p className="mt-4 text-center">
-                    <Link href="/" className="text-sm text-[rgb(var(--muted))] hover:text-[rgb(var(--foreground))] transition-colors">
+                    <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                         ← Back to home
                     </Link>
                 </p>

@@ -33,17 +33,27 @@ export class ErrorInfo {
     details?: string[];
 }
 
+/**
+ * Standardized API Response envelope.
+ * All API endpoints should return this format.
+ */
 export class ApiResponseDto<T> {
-    @ApiProperty({ example: true })
+    @ApiProperty({ example: true, description: 'Whether the request was successful' })
     success!: boolean;
 
-    @ApiPropertyOptional()
+    @ApiProperty({ example: 200, description: 'HTTP status code' })
+    statusCode!: number;
+
+    @ApiProperty({ example: '2026-01-31T19:50:00.000Z', description: 'ISO timestamp of response' })
+    timestamp!: string;
+
+    @ApiPropertyOptional({ description: 'Response payload' })
     data?: T;
 
-    @ApiPropertyOptional({ type: () => PaginationMeta })
+    @ApiPropertyOptional({ type: () => PaginationMeta, description: 'Pagination metadata for list responses' })
     meta?: PaginationMeta;
 
-    @ApiPropertyOptional({ type: () => ErrorInfo })
+    @ApiPropertyOptional({ type: () => ErrorInfo, description: 'Error details if success is false' })
     error?: ErrorInfo;
 }
 
@@ -82,19 +92,35 @@ export class PaginationDto {
     }
 }
 
-export function createSuccessResponse<T>(data: T): ApiResponseDto<T> {
-    return { success: true, data };
+/**
+ * Create a successful API response with standard envelope.
+ * @param data - The response payload
+ * @param statusCode - HTTP status code (default: 200)
+ */
+export function createSuccessResponse<T>(data: T, statusCode: number = 200): ApiResponseDto<T> {
+    return {
+        success: true,
+        statusCode,
+        timestamp: new Date().toISOString(),
+        data,
+    };
 }
 
+/**
+ * Create a paginated API response with metadata.
+ */
 export function createPaginatedResponse<T>(
     data: T[],
     page: number,
     pageSize: number,
     total: number,
+    statusCode: number = 200,
 ): ApiResponseDto<T[]> {
     const totalPages = Math.ceil(total / pageSize);
     return {
         success: true,
+        statusCode,
+        timestamp: new Date().toISOString(),
         data,
         meta: {
             page,
@@ -107,13 +133,23 @@ export function createPaginatedResponse<T>(
     };
 }
 
+/**
+ * Create an error API response.
+ * @param code - Error code (e.g., 'VALIDATION_ERROR')
+ * @param message - Human-readable error message
+ * @param statusCode - HTTP status code (default: 400)
+ * @param details - Optional array of detailed error messages
+ */
 export function createErrorResponse(
     code: string,
     message: string,
+    statusCode: number = 400,
     details?: string[],
 ): ApiResponseDto<null> {
     return {
         success: false,
+        statusCode,
+        timestamp: new Date().toISOString(),
         error: { code, message, details },
     };
 }

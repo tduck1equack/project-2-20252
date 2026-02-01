@@ -3,7 +3,7 @@ import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiCookieAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard, JwtAuthGuard } from './guards/auth.guard';
-import { RegisterDto, LoginDto, createSuccessResponse } from '@repo/dto';
+import { RegisterDto, LoginDto, createSuccessResponse, createErrorResponse } from '@repo/dto';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
@@ -47,7 +47,8 @@ export class AuthController {
         const oldRefreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
 
         if (!oldRefreshToken) {
-            return res.status(401).json({ success: false, error: { code: 'NO_TOKEN', message: 'No refresh token provided' } });
+            res.status(401);
+            return createErrorResponse('NO_TOKEN', 'No refresh token provided', 401);
         }
 
         const tokens = await this.authService.refresh(oldRefreshToken);

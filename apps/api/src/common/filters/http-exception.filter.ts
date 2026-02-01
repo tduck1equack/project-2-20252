@@ -47,7 +47,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             this.logger.error(`Unhandled error: ${exception.message}`, exception.stack);
         }
 
-        response.status(status).json(createErrorResponse(code, message, details));
+        response.status(status).json(createErrorResponse(code, message, status, details));
     }
 
     private getErrorCode(status: number, defaultCode: string): string {

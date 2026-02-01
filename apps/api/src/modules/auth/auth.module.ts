@@ -36,6 +36,6 @@ import { InfrastructureModule } from '../infrastructure/infrastructure.module';
         UserRepository,
         RefreshTokenRepository,
     ],
-    exports: [AuthService, RolesGuard, WsAuthGuard, JwtModule],
+    exports: [AuthService, RolesGuard, WsAuthGuard, JwtModule, ConfigModule],
 })
 export class AuthModule { }
