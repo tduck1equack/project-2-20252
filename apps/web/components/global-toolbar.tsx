@@ -2,6 +2,7 @@
 
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { NotificationBell } from "./notification-bell";
 
 interface GlobalToolbarProps {
     className?: string;
@@ -26,6 +27,7 @@ export function GlobalToolbar({
         <div className={`${orientationClass} ${className}`}>
             <ThemeToggle />
             <LanguageSwitcher />
+            <NotificationBell />
         </div>
     );
 }

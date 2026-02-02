@@ -11,6 +11,8 @@ import {
     AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
+import { useAdminAnalytics } from "@/hooks/useAdminAnalytics";
+import { RevenueChart } from "@/components/analytics/revenue-chart";
 
 // Dynamic import for 3D component (avoid SSR issues)
 const Hero3D = dynamic(
@@ -23,6 +25,7 @@ const Hero3D = dynamic(
     }
 );
 
+// TODO: Fetch this from API instead of hardcoding
 const recentActivity = [
     {
         id: 1,
@@ -32,44 +35,21 @@ const recentActivity = [
         time: "2 min ago",
         icon: Package,
         color: "text-green-500",
-    },
-    {
-        id: 2,
-        type: "alert",
-        title: "Low Stock Alert",
-        description: "Product SKU-001 below threshold",
-        time: "15 min ago",
-        icon: AlertTriangle,
-        color: "text-amber-500",
-    },
-    {
-        id: 3,
-        type: "invoice",
-        title: "Invoice Published",
-        description: "E-Invoice #INV-2024-001 sent",
-        time: "1 hour ago",
-        icon: TrendingUp,
-        color: "text-primary-500",
-    },
-    {
-        id: 4,
-        type: "movement",
-        title: "Stock Transfer",
-        description: "20 units moved to Warehouse B",
-        time: "3 hours ago",
-        icon: Package,
-        color: "text-blue-500",
-    },
+    }
 ];
 
 export default function AdminDashboard() {
+    const { data: stats, isLoading } = useAdminAnalytics();
+
+    if (isLoading) return <div>Loading Analytics...</div>;
+
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+                <h1 className="text-3xl font-bold mb-2">Dashboard ({stats?.systemHealth?.uptime ? 'Online' : 'Loading'})</h1>
                 <p className="text-[rgb(var(--muted))]">
-                    Welcome back! Here&apos;s your inventory overview.
+                    Welcome back! Overview of {stats?.totalUsers || 0} users and {stats?.totalOrders || 0} orders.
                 </p>
             </div>
 
@@ -77,86 +57,27 @@ export default function AdminDashboard() {
             <div className="grid lg:grid-cols-3 gap-6">
                 {/* 3D Visualization */}
                 <div className="lg:col-span-2">
-                    <GlassCard className="h-[300px] lg:h-[350px] p-0 overflow-hidden relative">
-                        <Hero3D className="w-full h-full" />
-                        <div className="absolute bottom-6 left-6 right-6 z-20">
-                            <h3 className="text-xl font-bold mb-2">
-                                Warehouse Overview
-                            </h3>
-                            <p className="text-[rgb(var(--muted))] text-sm mb-4">
-                                Real-time 3D visualization of your inventory
-                            </p>
-                            <Link
-                                href="/admin/inventory"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-                            >
-                                View Details
-                                <ArrowRight className="h-4 w-4" />
-                            </Link>
-                        </div>
-                    </GlassCard>
+                    <RevenueChart />
                 </div>
 
                 {/* Quick Stats */}
                 <div className="space-y-4">
                     <StatCard
-                        title="Total Inventory"
-                        value="12,847"
+                        title="Total Orders"
+                        value={stats?.totalOrders.toString() || "0"}
                         change={12.5}
                         changeLabel="vs last month"
                         icon="package"
                         delay={0}
                     />
                     <StatCard
-                        title="Active Batches"
-                        value="156"
-                        change={-2.3}
-                        changeLabel="3 expiring soon"
-                        icon="warehouse"
-                        delay={100}
-                    />
-                    <StatCard
-                        title="Pending Invoices"
-                        value="24"
-                        change={8}
-                        changeLabel="this week"
-                        icon="file"
+                        title="Total Revenue"
+                        value={`$${stats?.totalRevenue || 0}`}
+                        change={22.1}
+                        icon="dollar"
                         delay={200}
                     />
                 </div>
-            </div>
-
-            {/* Stats Row */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard
-                    title="Total Products"
-                    value="347"
-                    change={5.2}
-                    icon="package"
-                    delay={0}
-                />
-                <StatCard
-                    title="Stock Movements"
-                    value="1,247"
-                    change={18.7}
-                    changeLabel="this month"
-                    icon="chart"
-                    delay={100}
-                />
-                <StatCard
-                    title="Revenue (VND)"
-                    value="2.4B"
-                    change={22.1}
-                    icon="dollar"
-                    delay={200}
-                />
-                <StatCard
-                    title="Active Users"
-                    value="12"
-                    change={0}
-                    icon="users"
-                    delay={300}
-                />
             </div>
 
             {/* Recent Activity */}
@@ -172,7 +93,7 @@ export default function AdminDashboard() {
                         </Link>
                     </div>
                     <div className="space-y-4">
-                        {recentActivity.map((activity, index) => (
+                        {stats?.recentActivity.map((activity, index) => (
                             <div
                                 key={activity.id}
                                 className="flex items-start gap-4 p-3 rounded-xl hover:bg-[rgb(var(--surface-elevated))] transition-colors cursor-pointer animate-slide-in-right"
@@ -181,7 +102,7 @@ export default function AdminDashboard() {
                                 <div
                                     className={`p-2 rounded-lg bg-[rgb(var(--surface-elevated))] ${activity.color}`}
                                 >
-                                    <activity.icon className="h-4 w-4" />
+                                    <Package className="h-4 w-4" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-sm">
@@ -193,10 +114,11 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="flex items-center gap-1 text-xs text-[rgb(var(--muted))]">
                                     <Clock className="h-3 w-3" />
-                                    {activity.time}
+                                    {new Date(activity.time).toLocaleTimeString()}
                                 </div>
                             </div>
                         ))}
+                        {!stats?.recentActivity.length && <p className="text-sm text-muted">No recent activity.</p>}
                     </div>
                 </GlassCard>
 

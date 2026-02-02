@@ -1,7 +1,7 @@
 // IMPORTANT: Import @repo/config FIRST to load .env before PrismaClient reads process.env
 import '@repo/config';
 
-import { PrismaClient, Role, OrderStatus, MovementType, MovementStatus, JournalStatus } from '@prisma/client';
+import { PrismaClient, Role, OrderStatus, MovementType, MovementStatus, JournalStatus, AccountType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -197,95 +197,112 @@ async function main() {
     }
     console.log(`✅ Stock entries created: ${stockCount}`);
 
-    // 7. Create Stock Movements with proper schema (code, fromWarehouse/toWarehouse, items)
-    let movementCount = 0;
+    // 7. Create Stock Movements (1000 records)
+    console.log('⏳ Creating 1000 Stock Movements...');
     const movementTypes = [MovementType.INBOUND, MovementType.OUTBOUND, MovementType.TRANSFER];
 
-    for (let i = 0; i < 100; i++) {
-        const type = randomItem(movementTypes);
-        const fromWh = randomItem(warehouses);
-        const toWh = randomItem(warehouses.filter(w => w.id !== fromWh.id));
-        const creator = randomItem(employees);
-        const movDate = randomDate(90);
+    // Process in chunks of 50 to avoid connection pool exhaustion
+    const MOVEMENT_TOTAL = 1000;
+    const CHUNK_SIZE = 50;
+    let movementsCreated = 0;
 
-        // Determine from/to warehouse based on movement type
-        let fromWarehouseId: string | null = null;
-        let toWarehouseId: string | null = null;
+    for (let i = 0; i < MOVEMENT_TOTAL; i += CHUNK_SIZE) {
+        const chunkPromises = Array.from({ length: Math.min(CHUNK_SIZE, MOVEMENT_TOTAL - i) }).map(async (_, idx) => {
+            const index = i + idx;
+            const type = randomItem(movementTypes);
+            const fromWh = randomItem(warehouses);
+            const toWh = randomItem(warehouses.filter(w => w.id !== fromWh.id));
+            const creator = randomItem(employees);
+            const movDate = randomDate(365); // Last 1 year
 
-        if (type === MovementType.INBOUND) {
-            toWarehouseId = randomItem(warehouses).id; // Inbound goes TO a warehouse
-        } else if (type === MovementType.OUTBOUND) {
-            fromWarehouseId = randomItem(warehouses).id; // Outbound goes FROM a warehouse
-        } else { // TRANSFER
-            fromWarehouseId = fromWh.id;
-            toWarehouseId = toWh.id;
-        }
+            let fromWarehouseId: string | null = null;
+            let toWarehouseId: string | null = null;
 
-        // Select 1-3 random variants for this movement
-        const itemCount = Math.floor(Math.random() * 3) + 1;
-        const movementVariants = [...allVariants].sort(() => Math.random() - 0.5).slice(0, itemCount);
+            if (type === MovementType.INBOUND) {
+                toWarehouseId = randomItem(warehouses).id;
+            } else if (type === MovementType.OUTBOUND) {
+                fromWarehouseId = randomItem(warehouses).id;
+            } else {
+                fromWarehouseId = fromWh.id;
+                toWarehouseId = toWh.id;
+            }
 
-        await prisma.stockMovement.create({
-            data: {
-                code: `MOV-${2026}${String(i + 1).padStart(5, '0')}`, // e.g. MOV-202600001
-                type,
-                status: MovementStatus.COMPLETED,
-                date: movDate,
-                reference: type === MovementType.INBOUND ? `PO-${i + 1}` : (type === MovementType.OUTBOUND ? `SO-${i + 1}` : null),
-                fromWarehouseId,
-                toWarehouseId,
-                tenantId: tenant.id,
-                createdById: creator.id,
-                createdAt: movDate,
-                items: {
-                    create: movementVariants.map(v => ({
-                        productVariantId: v.id,
-                        quantity: Math.floor(Math.random() * 50) + 5
-                    }))
+            const itemCount = Math.floor(Math.random() * 5) + 1;
+            const movementVariants = [...allVariants].sort(() => Math.random() - 0.5).slice(0, itemCount);
+
+            return prisma.stockMovement.create({
+                data: {
+                    code: `MOV-${2025}${String(index + 1).padStart(6, '0')}`,
+                    type,
+                    status: MovementStatus.COMPLETED,
+                    date: movDate,
+                    reference: type === MovementType.INBOUND ? `PO-${index + 1}` : (type === MovementType.OUTBOUND ? `SO-${index + 1}` : null),
+                    fromWarehouseId,
+                    toWarehouseId,
+                    tenantId: tenant.id,
+                    createdById: creator.id,
+                    createdAt: movDate, // Important for analytics time-series
+                    items: {
+                        create: movementVariants.map(v => ({
+                            productVariantId: v.id,
+                            quantity: Math.floor(Math.random() * 50) + 5
+                        }))
+                    }
                 }
-            }
+            });
         });
-        movementCount++;
+
+        await Promise.all(chunkPromises);
+        movementsCreated += chunkPromises.length;
+        process.stdout.write(`\r   Progress: ${movementsCreated}/${MOVEMENT_TOTAL}`);
     }
-    console.log(`✅ Stock movements created: ${movementCount}`);
+    console.log(`\n✅ Stock movements created: ${movementsCreated}`);
 
-    // 8. Create Sales Orders (100 orders across 20 customers)
-    const orderStatuses = [OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.SHIPPED, OrderStatus.DELIVERED, OrderStatus.CANCELLED];
-    let orderCount = 0;
+    // 8. Create Sales Orders (1000 orders)
+    console.log('⏳ Creating 1000 Sales Orders...');
+    const orderStatuses = [OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.SHIPPED, OrderStatus.CANCELLED];
+    const ORDER_TOTAL = 1000;
+    let ordersCreated = 0;
 
-    for (let i = 0; i < 100; i++) {
-        const customer = randomItem(customers);
-        const itemCount = Math.floor(Math.random() * 4) + 1; // 1-4 items per order
-        const orderVariants = [...allVariants].sort(() => Math.random() - 0.5).slice(0, itemCount);
+    for (let i = 0; i < ORDER_TOTAL; i += CHUNK_SIZE) {
+        const chunkPromises = Array.from({ length: Math.min(CHUNK_SIZE, ORDER_TOTAL - i) }).map(async (_, idx) => {
+            const index = i + idx;
+            const customer = randomItem(customers);
+            const itemCount = Math.floor(Math.random() * 4) + 1;
+            const orderVariants = [...allVariants].sort(() => Math.random() - 0.5).slice(0, itemCount);
 
-        const items = orderVariants.map(v => {
-            const qty = Math.floor(Math.random() * 5) + 1;
-            return {
-                productVariantId: v.id,
-                quantity: qty,
-                unitPrice: v.price,
-                totalPrice: v.price * qty
-            };
+            const items = orderVariants.map(v => {
+                const qty = Math.floor(Math.random() * 5) + 1;
+                return {
+                    productVariantId: v.id,
+                    quantity: qty,
+                    unitPrice: v.price,
+                    totalPrice: v.price * qty
+                };
+            });
+
+            const totalAmount = items.reduce((acc, item) => acc + item.totalPrice, 0);
+            const orderDate = randomDate(365); // Distribution over a year
+
+            return prisma.salesOrder.create({
+                data: {
+                    code: `SO-${2025}${String(index + 1000).padStart(5, '0')}`,
+                    tenantId: tenant.id,
+                    customerId: customer.id,
+                    status: randomItem(orderStatuses),
+                    totalAmount,
+                    items: { create: items },
+                    createdAt: orderDate,
+                    updatedAt: orderDate
+                }
+            });
         });
 
-        const totalAmount = items.reduce((acc, item) => acc + item.totalPrice, 0);
-        const orderDate = randomDate(90);
-
-        await prisma.salesOrder.create({
-            data: {
-                code: `SO-${2026}${String(1000 + i).padStart(4, '0')}`,
-                tenantId: tenant.id,
-                customerId: customer.id,
-                status: randomItem(orderStatuses),
-                totalAmount,
-                items: { create: items },
-                createdAt: orderDate,
-                updatedAt: new Date(orderDate.getTime() + Math.random() * 86400000 * 3) // Updated within 3 days
-            }
-        });
-        orderCount++;
+        await Promise.all(chunkPromises);
+        ordersCreated += chunkPromises.length;
+        process.stdout.write(`\r   Progress: ${ordersCreated}/${ORDER_TOTAL}`);
     }
-    console.log(`✅ Sales orders created: ${orderCount}`);
+    console.log(`\n✅ Sales orders created: ${ordersCreated}`);
 
     // 9. Create Accounting Accounts (Chart of Accounts)
     const accounts = [
@@ -320,7 +337,7 @@ async function main() {
             create: {
                 code: acc.code,
                 name: acc.name,
-                type: acc.type,
+                type: acc.type as AccountType,
                 tenantId: tenant.id
             }
         });
@@ -362,8 +379,8 @@ async function main() {
     console.log(`   • Products: ${productCategories.length} with ${allVariants.length} variants`);
     console.log(`   • Warehouses: ${warehouses.length}`);
     console.log(`   • Stock entries: ${stockCount}`);
-    console.log(`   • Stock movements: ${movementCount}`);
-    console.log(`   • Sales orders: ${orderCount}`);
+    console.log(`   • Stock movements: ${movementsCreated}`);
+    console.log(`   • Sales orders: ${ordersCreated}`);
     console.log(`   • Accounts: ${accounts.length}`);
     console.log(`   • Journal entries: 50`);
 }

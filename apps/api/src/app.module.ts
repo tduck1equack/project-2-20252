@@ -11,6 +11,10 @@ import { InfrastructureModule } from './modules/infrastructure/infrastructure.mo
 import { SharedModule } from './modules/shared/shared.module';
 import { SalesModule } from './modules/sales/sales.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { NotificationModule } from './modules/notifications/notification.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -23,9 +27,13 @@ import { ReportsModule } from './modules/reports/reports.module';
     EInvoiceModule,
     SalesModule,
     ReportsModule,
+    NotificationModule,
+    PaymentModule,
+    SettingsModule,
+    AnalyticsModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

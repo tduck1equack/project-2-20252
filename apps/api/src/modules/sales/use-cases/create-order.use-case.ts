@@ -3,13 +3,14 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { MovementType, MovementStatus } from '@repo/dto';
 import { CreateOrderDto } from '../sales.controller'; // Temporary import
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { OrderCreatedEvent } from '../events/order-created.event';
 
 @Injectable()
 export class CreateOrderUseCase {
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async execute(tenantId: string, userId: string, dto: CreateOrderDto) {
     // 1. Validation & Price Fetching
@@ -21,6 +22,9 @@ export class CreateOrderUseCase {
     if (variants.length !== dto.items.length) {
       throw new BadRequestException('Some products not found');
     }
+
+    const customer = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!customer) throw new BadRequestException('Customer not found');
 
     // Map variant to price and check
     const itemMap = new Map(variants.map((v) => [v.id, v]));
@@ -156,7 +160,15 @@ export class CreateOrderUseCase {
         result.stockUpdates.forEach((u) =>
           this.eventEmitter.emit('stock.updated', u),
         );
-        this.eventEmitter.emit('order.created', result.order);
+        this.eventEmitter.emit(
+          'order.created',
+          new OrderCreatedEvent(
+            result.order.id,
+            customer.email,
+            Number(result.order.totalAmount),
+            result.order.code
+          )
+        );
         return result.order;
       });
   }

@@ -8,13 +8,14 @@ import { Loader2, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
-    const { items, totalPrice, clearCart } = useCartStore();
+    const [items, totalPrice, clearCart] = useCartStore((s) => [s.items, s.totalPrice, s.clearCart]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [orderId, setOrderId] = useState<string | null>(null);
+    const [order, setOrder] = useState<any | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isPaying, setIsPaying] = useState(false);
 
     // If empty and not completed, redirect
-    if (items.length === 0 && !orderId) {
+    if (items.length === 0 && !order) {
         return (
             <div className="p-8 text-center">
                 Redirecting...
@@ -35,7 +36,7 @@ export default function CheckoutPage() {
             };
 
             const res = await api.post('/sales/orders', payload);
-            setOrderId(res.data.id || res.data.code); // Adjust based on response structure
+            setOrder(res.data);
             clearCart();
         } catch (err: any) {
             console.error(err);
@@ -45,7 +46,19 @@ export default function CheckoutPage() {
         }
     };
 
-    if (orderId) {
+    const handlePayment = async () => {
+        setIsPaying(true);
+        try {
+            const res = await api.post<{ url: string }>('/payment/create_url', { order });
+            window.location.href = res.data.url;
+        } catch (err) {
+            console.error(err);
+            setIsPaying(false);
+            setError('Failed to initiate payment');
+        }
+    };
+
+    if (order) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 animate-fade-in">
                 <div className="w-24 h-24 bg-[rgb(var(--success))]/10 rounded-full flex items-center justify-center">
@@ -53,14 +66,18 @@ export default function CheckoutPage() {
                 </div>
                 <h1 className="text-3xl font-bold">Order Confirmed!</h1>
                 <p className="text-[rgb(var(--muted))] text-center max-w-md">
-                    Thank you for your purchase. Your order ID is <span className="font-mono font-bold">{orderId}</span>.
+                    Thank you for your purchase. Your order code is <span className="font-mono font-bold">{order.code}</span>.
                 </p>
-                <div className="flex gap-4">
-                    <Link href="/customer/products" className="btn-secondary">
-                        Continue Shopping
-                    </Link>
-                    <Link href="/customer/orders" className="btn-primary">
-                        View Order
+                <div className="flex flex-col gap-3 w-full max-w-xs">
+                    <button
+                        onClick={handlePayment}
+                        disabled={isPaying}
+                        className="btn-primary w-full flex items-center justify-center gap-2"
+                    >
+                        {isPaying ? <Loader2 className="animate-spin" /> : 'Pay with VNPay'}
+                    </button>
+                    <Link href="/customer/orders" className="btn-secondary w-full text-center">
+                        View Order Details
                     </Link>
                 </div>
             </div>
