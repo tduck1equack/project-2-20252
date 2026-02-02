@@ -4,7 +4,7 @@ import { UtilityService } from './services/utility.service';
 
 @Global()
 @Module({
-    providers: [LoggerService, UtilityService],
-    exports: [LoggerService, UtilityService],
+  providers: [LoggerService, UtilityService],
+  exports: [LoggerService, UtilityService],
 })
-export class SharedModule { }
+export class SharedModule {}

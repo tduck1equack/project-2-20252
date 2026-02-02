@@ -4,6 +4,10 @@ import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { SocketProvider } from "@/providers/socket-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getLocale } from "next-intl/server";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,13 +23,16 @@ export const metadata: Metadata = {
   description: "Enterprise Resource Planning System",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ThemeProvider
           attribute="class"
@@ -33,11 +40,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            <SocketProvider>
-              {children}
-            </SocketProvider>
-          </QueryProvider>
+          <NextIntlClientProvider messages={messages}>
+            <TooltipProvider>
+              <QueryProvider>
+                <SocketProvider>
+                  {children}
+                </SocketProvider>
+              </QueryProvider>
+            </TooltipProvider>
+          </NextIntlClientProvider>
+          <Toaster richColors position="top-right" />
         </ThemeProvider>
       </body>
     </html>

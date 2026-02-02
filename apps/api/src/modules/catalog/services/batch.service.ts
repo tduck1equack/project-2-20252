@@ -4,17 +4,22 @@ import { Batch } from '@repo/database';
 
 @Injectable()
 export class BatchService {
-    constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-    async create(data: { code: string; productVariantId: string; expiryDate?: Date; manufacturingDate?: Date }) {
-        return this.prisma.batch.create({
-            data,
-        });
-    }
+  async create(data: {
+    code: string;
+    productVariantId: string;
+    expiryDate?: Date;
+    manufacturingDate?: Date;
+  }) {
+    return this.prisma.batch.create({
+      data,
+    });
+  }
 
-    async findAll(productVariantId: string) {
-        return this.prisma.batch.findMany({
-            where: { productVariantId },
-        });
-    }
+  async findAll(productVariantId: string) {
+    return this.prisma.batch.findMany({
+      where: { productVariantId },
+    });
+  }
 }

@@ -8,8 +8,8 @@ import { BatchService } from './services/batch.service';
 import { PrismaService } from '../infrastructure/prisma/prisma.service';
 
 @Module({
-    controllers: [UomController, ProductController, BatchController],
-    providers: [UomService, ProductService, BatchService, PrismaService],
-    exports: [UomService, ProductService, BatchService],
+  controllers: [UomController, ProductController, BatchController],
+  providers: [UomService, ProductService, BatchService, PrismaService],
+  exports: [UomService, ProductService, BatchService],
 })
-export class CatalogModule { }
+export class CatalogModule {}

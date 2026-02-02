@@ -8,27 +8,32 @@
         "create": "Tạo mới",
         "search": "Tìm kiếm",
         "noResults": "Không tìm thấy kết quả",
-        "error": "Đã có lỗi xảy ra",
+        "error": "Đã xảy ra lỗi",
         "success": "Thành công",
         "confirm": "Xác nhận",
         "back": "Quay lại",
         "next": "Tiếp theo",
-        "submit": "Gửi"
+        "submit": "Gửi",
+        "notifications": "Thông báo",
+        "shoppingCart": "Giỏ hàng"
     },
     "nav": {
-        "dashboard": "Bảng điều khiển",
+        "dashboard": "Tổng quan",
         "inventory": "Kho hàng",
         "products": "Sản phẩm",
         "warehouses": "Nhà kho",
         "orders": "Đơn hàng",
         "reports": "Báo cáo",
         "settings": "Cài đặt",
-        "logout": "Đăng xuất"
+        "logout": "Đăng xuất",
+        "accounting": "Kế toán",
+        "userAccounts": "Tài khoản người dùng",
+        "batches": "Lô hàng"
     },
     "auth": {
         "login": "Đăng nhập",
         "register": "Đăng ký",
-        "email": "Email",
+        "email": "Địa chỉ email",
         "password": "Mật khẩu",
         "confirmPassword": "Xác nhận mật khẩu",
         "forgotPassword": "Quên mật khẩu?",
@@ -36,14 +41,19 @@
         "hasAccount": "Đã có tài khoản?",
         "loginSuccess": "Đăng nhập thành công",
         "loginError": "Email hoặc mật khẩu không đúng",
-        "registerSuccess": "Đăng ký thành công",
-        "logoutSuccess": "Bạn đã đăng xuất"
+        "registerSuccess": "Tạo tài khoản thành công! Vui lòng đăng nhập.",
+        "logoutSuccess": "Bạn đã đăng xuất",
+        "welcomeBack": "Chào mừng trở lại",
+        "signInToAccount": "Đăng nhập vào tài khoản của bạn",
+        "signingIn": "Đang đăng nhập...",
+        "createAccount": "Tạo tài khoản",
+        "backToHome": "Quay về trang chủ"
     },
     "dashboard": {
         "welcome": "Chào mừng trở lại",
         "totalProducts": "Tổng sản phẩm",
         "totalStock": "Tổng tồn kho",
-        "lowStock": "Cảnh báo tồn kho thấp",
+        "lowStock": "Cảnh báo hết hàng",
         "pendingOrders": "Đơn hàng chờ xử lý",
         "recentActivity": "Hoạt động gần đây",
         "quickActions": "Thao tác nhanh"
@@ -61,32 +71,32 @@
         "stock": "Tồn kho",
         "inStock": "Còn hàng",
         "outOfStock": "Hết hàng",
-        "lowStock": "Sắp hết",
-        "moveStock": "Di chuyển hàng",
-        "stockMovement": "Phiếu xuất nhập",
+        "lowStock": "Sắp hết hàng",
+        "moveStock": "Chuyển kho",
+        "stockMovement": "Di chuyển hàng",
         "fromWarehouse": "Từ kho",
         "toWarehouse": "Đến kho"
     },
     "orders": {
         "orders": "Đơn hàng",
-        "orderNumber": "Mã đơn #",
+        "orderNumber": "Đơn hàng #",
         "customer": "Khách hàng",
         "status": "Trạng thái",
         "total": "Tổng cộng",
         "date": "Ngày",
         "pending": "Chờ xử lý",
         "processing": "Đang xử lý",
-        "shipped": "Đang giao",
-        "delivered": "Đã giao",
+        "shipped": "Đã giao",
+        "delivered": "Đã nhận",
         "cancelled": "Đã hủy",
         "viewDetails": "Xem chi tiết",
         "updateStatus": "Cập nhật trạng thái"
     },
     "reports": {
         "reports": "Báo cáo",
-        "stockVelocity": "Tốc độ luân chuyển",
-        "salesSummary": "Tổng quan doanh số",
-        "stockSummary": "Tổng quan tồn kho",
+        "stockVelocity": "Tốc độ tồn kho",
+        "salesSummary": "Tổng hợp doanh số",
+        "stockSummary": "Tổng hợp tồn kho",
         "topProducts": "Sản phẩm bán chạy",
         "revenue": "Doanh thu",
         "last30Days": "30 ngày qua"
@@ -100,5 +110,13 @@
         "dark": "Tối",
         "system": "Hệ thống",
         "language": "Ngôn ngữ"
+    },
+    "portal": {
+        "manager": "Cổng Quản lý",
+        "employee": "Cổng Nhân viên",
+        "customer": "Cổng Khách hàng",
+        "admin": "Cổng Quản trị",
+        "erpSystem": "Hệ thống ERP",
+        "store": "Cửa hàng"
     }
 }

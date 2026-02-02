@@ -11,13 +11,13 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class WarehouseController {
-    constructor(private readonly warehouseService: WarehouseService) { }
+  constructor(private readonly warehouseService: WarehouseService) {}
 
-    @Get()
-    @Roles('MANAGER', 'EMPLOYEE', 'ADMIN') // Customers don't need to see warehouses list typically? Or maybe they do for pickup? stick to internal for now.
-    @ApiOperation({ summary: 'List all warehouses' })
-    async findAll(@Request() req: any): Promise<ApiResponseDto<WarehouseDto[]>> {
-        const warehouses = await this.warehouseService.findAll(req.user.tenantId);
-        return createSuccessResponse(warehouses);
-    }
+  @Get()
+  @Roles('MANAGER', 'EMPLOYEE', 'ADMIN') // Customers don't need to see warehouses list typically? Or maybe they do for pickup? stick to internal for now.
+  @ApiOperation({ summary: 'List all warehouses' })
+  async findAll(@Request() req: any): Promise<ApiResponseDto<WarehouseDto[]>> {
+    const warehouses = await this.warehouseService.findAll(req.user.tenantId);
+    return createSuccessResponse(warehouses);
+  }
 }

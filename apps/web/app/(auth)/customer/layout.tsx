@@ -9,21 +9,24 @@ import { AuthGuard } from '@/components/auth-guard';
 import { ShoppingBag, Package, User, LogOut, Home, ShoppingCart } from 'lucide-react';
 import { GlobalToolbar } from '@/components/global-toolbar';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCartStore } from '@/stores/cart-store';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-    { href: '/customer', label: 'Dashboard', icon: Home },
-    { href: '/customer/products', label: 'Products', icon: Package },
-    { href: '/customer/orders', label: 'My Orders', icon: ShoppingBag },
-    { href: '/customer/profile', label: 'Profile', icon: User },
-];
+import { useTranslations } from 'next-intl';
 
 export default function CustomerLayout({ children }: { children: ReactNode }) {
     const { user } = useAuthStore();
     const logoutMutation = useLogout();
     const cartItemCount = useCartStore((state) => state.items.length);
     const pathname = usePathname();
+    const t = useTranslations();
+
+    const navItems = [
+        { href: '/customer', label: t('nav.dashboard'), icon: Home },
+        { href: '/customer/products', label: t('nav.products'), icon: Package },
+        { href: '/customer/orders', label: t('nav.orders'), icon: ShoppingBag },
+        { href: '/customer/profile', label: t('settings.profile'), icon: User },
+    ];
 
     return (
         <AuthGuard allowedRoles={['CUSTOMER']}>
@@ -65,21 +68,28 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                             {/* Right Side: Cart + Theme + Language + User */}
                             <div className="flex items-center gap-2">
                                 {/* Cart */}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    asChild
-                                    className="relative cursor-pointer"
-                                >
-                                    <Link href="/customer/cart" title="Shopping Cart">
-                                        <ShoppingCart className="w-5 h-5 text-muted-foreground" />
-                                        {cartItemCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-accent text-white text-xs flex items-center justify-center">
-                                                {cartItemCount}
-                                            </span>
-                                        )}
-                                    </Link>
-                                </Button>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            asChild
+                                            className="relative cursor-pointer"
+                                        >
+                                            <Link href="/customer/cart">
+                                                <ShoppingCart className="w-5 h-5 text-muted-foreground" />
+                                                {cartItemCount > 0 && (
+                                                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-accent text-white text-xs flex items-center justify-center">
+                                                        {cartItemCount}
+                                                    </span>
+                                                )}
+                                            </Link>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Shopping Cart</p>
+                                    </TooltipContent>
+                                </Tooltip>
 
                                 {/* Theme Toggle + Language */}
                                 <GlobalToolbar />
@@ -90,16 +100,22 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                                 <span className="text-sm text-muted-foreground hidden sm:inline">
                                     {user?.name || user?.email}
                                 </span>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => logoutMutation.mutate()}
-                                    disabled={logoutMutation.isPending}
-                                    className="cursor-pointer"
-                                    title="Logout"
-                                >
-                                    <LogOut className="w-5 h-5 text-muted-foreground" />
-                                </Button>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => logoutMutation.mutate()}
+                                            disabled={logoutMutation.isPending}
+                                            className="cursor-pointer"
+                                        >
+                                            <LogOut className="w-5 h-5 text-muted-foreground" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{t('nav.logout')}</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
                         </div>
                     </div>

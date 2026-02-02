@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
     Menu,
     Package,
@@ -18,44 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { GlobalToolbar } from "@/components/global-toolbar";
 import { Input } from "@/components/ui/input";
-
-const navItems = [
-    { href: "/admin", icon: BarChart3, label: "Dashboard" },
-    { href: "/admin/inventory", icon: Package, label: "Inventory" },
-    { href: "/admin/accounting", icon: FileText, label: "Accounting" },
-    { href: "/admin/warehouses", icon: Warehouse, label: "Warehouses" },
-    { href: "/admin/settings", icon: Settings, label: "Settings" },
-];
-
-function NavLink({
-    href,
-    icon: Icon,
-    label,
-    isActive,
-}: {
-    href: string;
-    icon: typeof BarChart3;
-    label: string;
-    isActive: boolean;
-}) {
-    return (
-        <Link
-            href={href}
-            className={cn(
-                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 cursor-pointer",
-                isActive
-                    ? "bg-primary/10 text-primary shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-            )}
-        >
-            <Icon className={cn("h-5 w-5", isActive && "text-primary")} />
-            <span>{label}</span>
-            {isActive && (
-                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-            )}
-        </Link>
-    );
-}
+import { useTranslations } from "next-intl";
 
 export default function AdminLayout({
     children,
@@ -63,6 +27,45 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const t = useTranslations();
+
+    const navItems = [
+        { href: "/admin", icon: BarChart3, label: t('nav.dashboard') },
+        { href: "/admin/inventory", icon: Package, label: t('nav.inventory') },
+        { href: "/admin/accounting", icon: FileText, label: "Accounting" },
+        { href: "/admin/warehouses", icon: Warehouse, label: t('nav.warehouses') },
+        { href: "/admin/settings", icon: Settings, label: t('nav.settings') },
+    ];
+
+    function NavLink({
+        href,
+        icon: Icon,
+        label,
+        isActive,
+    }: {
+        href: string;
+        icon: typeof BarChart3;
+        label: string;
+        isActive: boolean;
+    }) {
+        return (
+            <Link
+                href={href}
+                className={cn(
+                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 cursor-pointer",
+                    isActive
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                )}
+            >
+                <Icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                <span>{label}</span>
+                {isActive && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                )}
+            </Link>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -100,13 +103,20 @@ export default function AdminLayout({
 
                     {/* Bottom section */}
                     <div className="space-y-2">
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer"
-                        >
-                            <LogOut className="h-5 w-5" />
-                            <span>Logout</span>
-                        </Button>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                    <span>{t('nav.logout')}</span>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                                <p>{t('nav.logout')}</p>
+                            </TooltipContent>
+                        </Tooltip>
                     </div>
                 </div>
             </aside>
@@ -158,7 +168,7 @@ export default function AdminLayout({
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="text"
-                                placeholder="Search..."
+                                placeholder={`${t('common.search')}...`}
                                 className="w-full pl-10 pr-4"
                             />
                         </div>
@@ -166,10 +176,17 @@ export default function AdminLayout({
 
                     {/* Right side */}
                     <div className="flex items-center gap-3">
-                        <Button variant="ghost" size="icon" className="relative cursor-pointer">
-                            <Bell className="h-5 w-5 text-muted-foreground" />
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
-                        </Button>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="relative cursor-pointer">
+                                    <Bell className="h-5 w-5 text-muted-foreground" />
+                                    <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Notifications</p>
+                            </TooltipContent>
+                        </Tooltip>
                         <Button variant="ghost" className="gap-3 cursor-pointer">
                             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent" />
                             <span className="hidden sm:block text-sm font-medium">Admin</span>

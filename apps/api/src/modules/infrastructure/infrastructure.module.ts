@@ -4,8 +4,8 @@ import { RedisModule } from './redis/redis.module';
 
 @Global()
 @Module({
-    imports: [RedisModule],
-    providers: [PrismaService],
-    exports: [PrismaService, RedisModule],
+  imports: [RedisModule],
+  providers: [PrismaService],
+  exports: [PrismaService, RedisModule],
 })
-export class InfrastructureModule { }
+export class InfrastructureModule {}

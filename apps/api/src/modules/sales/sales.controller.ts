@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Patch, Body, Param, UseGuards, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -11,14 +20,14 @@ import { User } from '../auth/decorators/user.decorator';
 
 // DTOs (inline for now)
 export class CreateOrderDto {
-    items!: {
-        productVariantId: string;
-        quantity: number;
-    }[];
+  items!: {
+    productVariantId: string;
+    quantity: number;
+  }[];
 }
 
 export class UpdateOrderStatusDto {
-    status!: OrderStatus;
+  status!: OrderStatus;
 }
 
 @ApiTags('Sales')
@@ -26,40 +35,55 @@ export class UpdateOrderStatusDto {
 @UseGuards(RolesGuard)
 @ApiBearerAuth()
 export class SalesController {
-    constructor(
-        private createOrderUseCase: CreateOrderUseCase,
-        private getOrdersUseCase: GetOrdersUseCase,
-        private updateOrderStatusUseCase: UpdateOrderStatusUseCase
-    ) { }
+  constructor(
+    private createOrderUseCase: CreateOrderUseCase,
+    private getOrdersUseCase: GetOrdersUseCase,
+    private updateOrderStatusUseCase: UpdateOrderStatusUseCase,
+  ) {}
 
-    @Post('orders')
-    @Roles(Role.CUSTOMER)
-    @ApiOperation({ summary: 'Create a new sales order' })
-    async createOrder(@User() user: any, @Body() dto: CreateOrderDto): Promise<ApiResponseDto<any>> {
-        if (!user || !user.id || !user.tenantId) throw new UnauthorizedException();
-        const order = await this.createOrderUseCase.execute(user.tenantId, user.id, dto);
-        return createSuccessResponse(order, 201);
-    }
+  @Post('orders')
+  @Roles(Role.CUSTOMER)
+  @ApiOperation({ summary: 'Create a new sales order' })
+  async createOrder(
+    @User() user: any,
+    @Body() dto: CreateOrderDto,
+  ): Promise<ApiResponseDto<any>> {
+    if (!user || !user.id || !user.tenantId) throw new UnauthorizedException();
+    const order = await this.createOrderUseCase.execute(
+      user.tenantId,
+      user.id,
+      dto,
+    );
+    return createSuccessResponse(order, 201);
+  }
 
-    @Get('orders')
-    @Roles(Role.CUSTOMER, Role.MANAGER, Role.ADMIN)
-    @ApiOperation({ summary: 'Get orders (Customers see own, Managers see all)' })
-    async getOrders(@User() user: any): Promise<ApiResponseDto<any[]>> {
-        if (!user || !user.id || !user.tenantId) throw new UnauthorizedException();
-        const orders = await this.getOrdersUseCase.execute(user.tenantId, user.id, user.role);
-        return createSuccessResponse(orders);
-    }
+  @Get('orders')
+  @Roles(Role.CUSTOMER, Role.MANAGER, Role.ADMIN)
+  @ApiOperation({ summary: 'Get orders (Customers see own, Managers see all)' })
+  async getOrders(@User() user: any): Promise<ApiResponseDto<any[]>> {
+    if (!user || !user.id || !user.tenantId) throw new UnauthorizedException();
+    const orders = await this.getOrdersUseCase.execute(
+      user.tenantId,
+      user.id,
+      user.role,
+    );
+    return createSuccessResponse(orders);
+  }
 
-    @Patch('orders/:id/status')
-    @Roles(Role.MANAGER, Role.ADMIN)
-    @ApiOperation({ summary: 'Update order status (Manager only)' })
-    async updateOrderStatus(
-        @User() user: any,
-        @Param('id') orderId: string,
-        @Body() dto: UpdateOrderStatusDto
-    ): Promise<ApiResponseDto<any>> {
-        if (!user || !user.tenantId) throw new UnauthorizedException();
-        const order = await this.updateOrderStatusUseCase.execute(user.tenantId, orderId, dto.status);
-        return createSuccessResponse(order);
-    }
+  @Patch('orders/:id/status')
+  @Roles(Role.MANAGER, Role.ADMIN)
+  @ApiOperation({ summary: 'Update order status (Manager only)' })
+  async updateOrderStatus(
+    @User() user: any,
+    @Param('id') orderId: string,
+    @Body() dto: UpdateOrderStatusDto,
+  ): Promise<ApiResponseDto<any>> {
+    if (!user || !user.tenantId) throw new UnauthorizedException();
+    const order = await this.updateOrderStatusUseCase.execute(
+      user.tenantId,
+      orderId,
+      dto.status,
+    );
+    return createSuccessResponse(order);
+  }
 }

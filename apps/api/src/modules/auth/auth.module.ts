@@ -15,27 +15,27 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository'
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 
 @Module({
-    imports: [
-        PassportModule,
-        ConfigModule,
-        InfrastructureModule, // For PrismaService
-        JwtModule.register({
-            secret: env.JWT_SECRET,
-            signOptions: { expiresIn: '15m' },
-        }),
-    ],
-    controllers: [AuthController],
-    providers: [
-        AuthService,
-        LocalStrategy,
-        JwtStrategy,
-        TokenBlacklistService,
-        RolesGuard,
-        WsAuthGuard,
-        // Repositories
-        UserRepository,
-        RefreshTokenRepository,
-    ],
-    exports: [AuthService, RolesGuard, WsAuthGuard, JwtModule, ConfigModule],
+  imports: [
+    PassportModule,
+    ConfigModule,
+    InfrastructureModule, // For PrismaService
+    JwtModule.register({
+      secret: env.JWT_SECRET,
+      signOptions: { expiresIn: '15m' },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    TokenBlacklistService,
+    RolesGuard,
+    WsAuthGuard,
+    // Repositories
+    UserRepository,
+    RefreshTokenRepository,
+  ],
+  exports: [AuthService, RolesGuard, WsAuthGuard, JwtModule, ConfigModule],
 })
-export class AuthModule { }
+export class AuthModule {}

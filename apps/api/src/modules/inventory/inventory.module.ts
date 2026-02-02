@@ -18,35 +18,32 @@ import { InventoryGateway } from './gateways/inventory.gateway';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-    imports: [
-        InfrastructureModule,
-        AuthModule // For WsAuthGuard
-    ],
-    controllers: [
-        ProductController,
-        WarehouseController,
-        StockController,
-        StockMovementController
-    ],
-    providers: [
-        ProductService,
-        WarehouseService,
-        StockService,
-        MovementService,
-        CreateStockMovementUseCase,
-        InventoryGateway, // WebSocket Gateway
-        {
-            provide: 'ProductRepository',
-            useClass: PrismaProductRepository
-        },
-        {
-            provide: 'StockRepository',
-            useClass: PrismaStockRepository
-        }
-    ],
-    exports: [
-        ProductService,
-        StockService
-    ]
+  imports: [
+    InfrastructureModule,
+    AuthModule, // For WsAuthGuard
+  ],
+  controllers: [
+    ProductController,
+    WarehouseController,
+    StockController,
+    StockMovementController,
+  ],
+  providers: [
+    ProductService,
+    WarehouseService,
+    StockService,
+    MovementService,
+    CreateStockMovementUseCase,
+    InventoryGateway, // WebSocket Gateway
+    {
+      provide: 'ProductRepository',
+      useClass: PrismaProductRepository,
+    },
+    {
+      provide: 'StockRepository',
+      useClass: PrismaStockRepository,
+    },
+  ],
+  exports: [ProductService, StockService],
 })
-export class InventoryModule { }
+export class InventoryModule {}

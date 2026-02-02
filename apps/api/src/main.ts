@@ -33,7 +33,8 @@ async function bootstrap() {
   // OpenAPI/Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Project-2 ERP API')
-    .setDescription(`
+    .setDescription(
+      `
 ## Overview
 Enterprise Resource Planning API for inventory management, accounting, and e-invoicing.
 
@@ -43,7 +44,8 @@ Enterprise Resource Planning API for inventory management, accounting, and e-inv
 - **Catalog** - Products and categories
 - **Accounting** - VAS-compliant ledger and journal entries
 - **E-Invoice** - Electronic invoice generation
-    `)
+    `,
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('Auth', 'Authentication and authorization')

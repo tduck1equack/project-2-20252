@@ -8,16 +8,21 @@ import { JournalRepository } from './repositories/journal.repository';
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 
 @Module({
-    imports: [InfrastructureModule], // For PrismaService
-    controllers: [AccountController, JournalController],
-    providers: [
-        // Repositories
-        AccountRepository,
-        JournalRepository,
-        // Services
-        AccountService,
-        JournalService,
-    ],
-    exports: [AccountService, JournalService, AccountRepository, JournalRepository],
+  imports: [InfrastructureModule], // For PrismaService
+  controllers: [AccountController, JournalController],
+  providers: [
+    // Repositories
+    AccountRepository,
+    JournalRepository,
+    // Services
+    AccountService,
+    JournalService,
+  ],
+  exports: [
+    AccountService,
+    JournalService,
+    AccountRepository,
+    JournalRepository,
+  ],
 })
-export class AccountingModule { }
+export class AccountingModule {}

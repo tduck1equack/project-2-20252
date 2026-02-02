@@ -9,20 +9,23 @@ import { AuthGuard } from '@/components/auth-guard';
 import { Building2, Users, BarChart3, LogOut, Home, Settings, FileText } from 'lucide-react';
 import { GlobalToolbar } from '@/components/global-toolbar';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-    { href: '/manager', label: 'Dashboard', icon: Home },
-    { href: '/manager/warehouses', label: 'Warehouses', icon: Building2 },
-    { href: '/manager/accounts', label: 'User Accounts', icon: Users },
-    { href: '/manager/reports', label: 'Reports', icon: FileText },
-    { href: '/manager/settings', label: 'Settings', icon: Settings },
-];
+import { useTranslations } from 'next-intl';
 
 export default function ManagerLayout({ children }: { children: ReactNode }) {
     const { user } = useAuthStore();
     const logoutMutation = useLogout();
     const pathname = usePathname();
+    const t = useTranslations();
+
+    const navItems = [
+        { href: '/manager', label: t('nav.dashboard'), icon: Home },
+        { href: '/manager/warehouses', label: t('nav.warehouses'), icon: Building2 },
+        { href: '/manager/accounts', label: 'User Accounts', icon: Users },
+        { href: '/manager/reports', label: t('nav.reports'), icon: FileText },
+        { href: '/manager/settings', label: t('nav.settings'), icon: Settings },
+    ];
 
     return (
         <AuthGuard allowedRoles={['MANAGER']}>
@@ -80,16 +83,22 @@ export default function ManagerLayout({ children }: { children: ReactNode }) {
                                 <p className="text-sm font-medium truncate">{user?.name || 'Manager'}</p>
                                 <p className="text-xs text-muted-foreground truncate">{user?.role}</p>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => logoutMutation.mutate()}
-                                disabled={logoutMutation.isPending}
-                                className="cursor-pointer"
-                                title="Logout"
-                            >
-                                <LogOut className="w-4 h-4 text-muted-foreground" />
-                            </Button>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => logoutMutation.mutate()}
+                                        disabled={logoutMutation.isPending}
+                                        className="cursor-pointer"
+                                    >
+                                        <LogOut className="w-4 h-4 text-muted-foreground" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{t('nav.logout')}</p>
+                                </TooltipContent>
+                            </Tooltip>
                         </div>
                     </div>
                 </aside>

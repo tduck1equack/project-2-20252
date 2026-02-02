@@ -7,29 +7,29 @@ const ACCESS_TOKEN_TTL = 15 * 60; // 15 minutes in seconds
 
 @Injectable()
 export class TokenBlacklistService {
-    constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) { }
+  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
-    /**
-     * Add a JWT access token to the blacklist
-     * Token will be auto-removed after its TTL expires
-     */
-    async blacklist(jti: string, expiresInSeconds?: number): Promise<void> {
-        const ttl = expiresInSeconds ?? ACCESS_TOKEN_TTL;
-        await this.redis.setex(`${BLACKLIST_PREFIX}${jti}`, ttl, '1');
-    }
+  /**
+   * Add a JWT access token to the blacklist
+   * Token will be auto-removed after its TTL expires
+   */
+  async blacklist(jti: string, expiresInSeconds?: number): Promise<void> {
+    const ttl = expiresInSeconds ?? ACCESS_TOKEN_TTL;
+    await this.redis.setex(`${BLACKLIST_PREFIX}${jti}`, ttl, '1');
+  }
 
-    /**
-     * Check if a token is blacklisted
-     */
-    async isBlacklisted(jti: string): Promise<boolean> {
-        const result = await this.redis.get(`${BLACKLIST_PREFIX}${jti}`);
-        return result !== null;
-    }
+  /**
+   * Check if a token is blacklisted
+   */
+  async isBlacklisted(jti: string): Promise<boolean> {
+    const result = await this.redis.get(`${BLACKLIST_PREFIX}${jti}`);
+    return result !== null;
+  }
 
-    /**
-     * Get remaining TTL for a blacklisted token (for debugging)
-     */
-    async getTTL(jti: string): Promise<number> {
-        return this.redis.ttl(`${BLACKLIST_PREFIX}${jti}`);
-    }
+  /**
+   * Get remaining TTL for a blacklisted token (for debugging)
+   */
+  async getTTL(jti: string): Promise<number> {
+    return this.redis.ttl(`${BLACKLIST_PREFIX}${jti}`);
+  }
 }

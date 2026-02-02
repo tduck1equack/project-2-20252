@@ -13,7 +13,9 @@
         "confirm": "Confirm",
         "back": "Back",
         "next": "Next",
-        "submit": "Submit"
+        "submit": "Submit",
+        "notifications": "Notifications",
+        "shoppingCart": "Shopping Cart"
     },
     "nav": {
         "dashboard": "Dashboard",
@@ -23,12 +25,15 @@
         "orders": "Orders",
         "reports": "Reports",
         "settings": "Settings",
-        "logout": "Logout"
+        "logout": "Logout",
+        "accounting": "Accounting",
+        "userAccounts": "User Accounts",
+        "batches": "Batches"
     },
     "auth": {
-        "login": "Login",
+        "login": "Sign in",
         "register": "Register",
-        "email": "Email",
+        "email": "Email address",
         "password": "Password",
         "confirmPassword": "Confirm Password",
         "forgotPassword": "Forgot Password?",
@@ -36,8 +41,13 @@
         "hasAccount": "Already have an account?",
         "loginSuccess": "Login successful",
         "loginError": "Invalid email or password",
-        "registerSuccess": "Registration successful",
-        "logoutSuccess": "You have been logged out"
+        "registerSuccess": "Account created successfully! Please sign in.",
+        "logoutSuccess": "You have been logged out",
+        "welcomeBack": "Welcome back",
+        "signInToAccount": "Sign in to your account",
+        "signingIn": "Signing in...",
+        "createAccount": "Create one",
+        "backToHome": "Back to home"
     },
     "dashboard": {
         "welcome": "Welcome back",
@@ -100,5 +110,13 @@
         "dark": "Dark",
         "system": "System",
         "language": "Language"
+    },
+    "portal": {
+        "manager": "Manager Portal",
+        "employee": "Employee Portal",
+        "customer": "Customer Portal",
+        "admin": "Admin Portal",
+        "erpSystem": "ERP System",
+        "store": "Store"
     }
 }

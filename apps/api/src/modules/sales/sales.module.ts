@@ -9,20 +9,16 @@ import { InventoryModule } from '../inventory/inventory.module';
 import { EInvoiceModule } from '../einvoice/einvoice.module';
 
 @Module({
-    imports: [
-        InfrastructureModule,
-        InventoryModule,
-        EInvoiceModule
-    ],
-    controllers: [SalesController],
-    providers: [
-        // Repositories
-        OrderRepository,
-        // Use Cases
-        CreateOrderUseCase,
-        GetOrdersUseCase,
-        UpdateOrderStatusUseCase
-    ],
-    exports: [OrderRepository]
+  imports: [InfrastructureModule, InventoryModule, EInvoiceModule],
+  controllers: [SalesController],
+  providers: [
+    // Repositories
+    OrderRepository,
+    // Use Cases
+    CreateOrderUseCase,
+    GetOrdersUseCase,
+    UpdateOrderStatusUseCase,
+  ],
+  exports: [OrderRepository],
 })
-export class SalesModule { }
+export class SalesModule {}

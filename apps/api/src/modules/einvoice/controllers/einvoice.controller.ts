@@ -10,12 +10,28 @@ import { createSuccessResponse, ApiResponseDto } from '@repo/dto';
 @ApiBearerAuth()
 @Controller('einvoice')
 export class EInvoiceController {
-    constructor(private readonly service: EInvoiceService) { }
+  constructor(private readonly service: EInvoiceService) {}
 
-    @Post('publish')
-    @ApiOperation({ summary: 'Publish an electronic invoice' })
-    async publish(@Request() req: any, @Body() data: InvoiceData): Promise<ApiResponseDto<any>> {
-        const result = await this.service.publishInvoice(req.user.tenantId, data);
-        return createSuccessResponse(result, 201);
-    }
+  @Post('publish')
+  @ApiOperation({ summary: 'Publish an electronic invoice' })
+  async publish(
+    @Request() req: any,
+    @Body() data: InvoiceData,
+  ): Promise<ApiResponseDto<any>> {
+    const result = await this.service.publishInvoice(req.user.tenantId, data);
+    return createSuccessResponse(result, 201);
+  }
+
+  @Post('issue')
+  @ApiOperation({ summary: 'Issue E-Invoice from Sales Order' })
+  async issue(
+    @Request() req: any,
+    @Body() body: { orderId: string },
+  ): Promise<ApiResponseDto<any>> {
+    const result = await this.service.issueInvoice(
+      req.user.tenantId,
+      body.orderId,
+    );
+    return createSuccessResponse(result, 201);
+  }
 }

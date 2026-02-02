@@ -5,8 +5,8 @@ import { MockInvoiceProvider } from './providers/mock-einvoice.provider';
 import { PrismaService } from '../infrastructure/prisma/prisma.service';
 
 @Module({
-    controllers: [EInvoiceController],
-    providers: [EInvoiceService, MockInvoiceProvider, PrismaService],
-    exports: [EInvoiceService]
+  controllers: [EInvoiceController],
+  providers: [EInvoiceService, MockInvoiceProvider, PrismaService],
+  exports: [EInvoiceService],
 })
-export class EInvoiceModule { }
+export class EInvoiceModule {}
