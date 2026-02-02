@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { format, subDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,42 +14,12 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-
-interface AccountChange {
-    id: string;
-    code: string;
-    name: string;
-    type: string;
-    netChange: number;
-}
+import { useIncomeStatement } from "@/hooks/useFinancialReports";
 
 export function IncomeStatement() {
     const [fromDate, setFromDate] = useState(format(subDays(new Date(), 30), "yyyy-MM-dd"));
     const [toDate, setToDate] = useState(format(new Date(), "yyyy-MM-dd"));
-    const [data, setData] = useState<{ revenue: number, expenses: number, netProfit: number, details: AccountChange[] } | null>(null);
-    const [loading, setLoading] = useState(false);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem("accessToken");
-            const res = await fetch(\`http://localhost:3001/reports/financial/income-statement?fromDate=\${fromDate}&toDate=\${toDate}\`, {
-                headers: { Authorization: \`Bearer \${token}\` }
-            });
-            const json = await res.json();
-            if (json.success) {
-                setData(json.data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch P&L", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
+    const { data, isLoading, refetch } = useIncomeStatement(fromDate, toDate);
 
     const revenues = data?.details.filter(d => d.type === "REVENUE") || [];
     const expenses = data?.details.filter(d => d.type === "EXPENSE") || [];
@@ -57,21 +27,21 @@ export function IncomeStatement() {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-4">
-                <Input 
-                    type="date" 
-                    value={fromDate} 
-                    onChange={(e) => setFromDate(e.target.value)} 
+                <Input
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
                     className="w-48"
                 />
                 <span className="text-muted-foreground">-</span>
-                <Input 
-                    type="date" 
-                    value={toDate} 
-                    onChange={(e) => setToDate(e.target.value)} 
+                <Input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
                     className="w-48"
                 />
-                <Button onClick={fetchData} disabled={loading}>
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button onClick={() => refetch()} disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Generate Report
                 </Button>
             </div>

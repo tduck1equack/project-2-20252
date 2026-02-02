@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,72 +12,29 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Loader2, FileCheck, FileX, FileText } from "lucide-react";
-import { toast } from "sonner"; // Assuming sonner is used, or alert
-
-interface OrderDetail {
-    id: string;
-    code: string;
-    totalAmount: string;
-    taxAmount: string;
-    status: string;
-    customer: { name: string; email: string };
-    items: any[];
-    einvoiceLogs: { id: string; status: string; externalUrl?: string; invoiceNo: string }[];
-}
+import { Loader2, FileCheck, FileText } from "lucide-react";
+import { toast } from "sonner";
+import { useSalesOrder, useIssueInvoice } from "@/hooks/useSalesOrders";
 
 export default function OrderDetailPage() {
     const params = useParams();
-    const [order, setOrder] = useState<OrderDetail | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [issuing, setIssuing] = useState(false);
+    const id = params.id as string;
 
-    const fetchOrder = async () => {
-        try {
-            const token = localStorage.getItem("accessToken");
-            const res = await fetch(\`http://localhost:3001/sales/orders/\${params.id}\`, {
-                headers: { Authorization: \`Bearer \${token}\` }
-            });
-            const json = await res.json();
-            if (json.success) setOrder(json.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: order, isLoading } = useSalesOrder(id);
+    const { mutate: issueInvoice, isPending: issuing } = useIssueInvoice();
 
-    useEffect(() => {
-        if (params.id) fetchOrder();
-    }, [params.id]);
-
-    const handleIssueInvoice = async () => {
-        setIssuing(true);
-        try {
-            const token = localStorage.getItem("accessToken");
-            const res = await fetch(\`http://localhost:3001/einvoice/issue\`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: \`Bearer \${token}\`
-                },
-                body: JSON.stringify({ orderId: params.id })
-            });
-            const json = await res.json();
-            if (res.ok) {
+    const handleIssueInvoice = () => {
+        issueInvoice(id, {
+            onSuccess: () => {
                 toast.success("E-Invoice Issued Successfully!");
-                fetchOrder(); // Refresh to see new log
-            } else {
-                toast.error(json.message || "Failed to issue invoice");
+            },
+            onError: (err: any) => {
+                toast.error(err.message || "Failed to issue invoice");
             }
-        } catch (error) {
-            toast.error("Network error");
-        } finally {
-            setIssuing(false);
-        }
+        });
     };
 
-    if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
+    if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
     if (!order) return <div>Order not found</div>;
 
     const activeInvoice = order.einvoiceLogs?.find(l => l.status === 'PUBLISHED');

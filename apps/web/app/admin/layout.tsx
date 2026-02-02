@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { GlobalToolbar } from "@/components/global-toolbar";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
+import { AuthGuard } from "@/components/auth-guard";
 
 export default function AdminLayout({
     children,
@@ -29,6 +30,22 @@ export default function AdminLayout({
     const pathname = usePathname();
     const t = useTranslations();
 
+    return (
+        <AuthGuard allowedRoles={['ADMIN']}>
+            <AdminLayoutContent pathname={pathname} t={t} children={children} />
+        </AuthGuard>
+    );
+}
+
+function AdminLayoutContent({
+    pathname,
+    t,
+    children
+}: {
+    pathname: string;
+    t: any;
+    children: React.ReactNode;
+}) {
     const navItems = [
         { href: "/admin", icon: BarChart3, label: t('nav.dashboard') },
         { href: "/admin/inventory", icon: Package, label: t('nav.inventory') },

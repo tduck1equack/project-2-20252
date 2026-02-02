@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -13,38 +12,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus } from "lucide-react";
-
-interface Order {
-    id: string;
-    code: string;
-    customer: { name: string; email: string };
-    totalAmount: string; // or number (Decimal comes as string often)
-    status: string;
-    createdAt: string;
-}
+import { useSalesOrders } from "@/hooks/useSalesOrders";
 
 export default function SalesOrdersPage() {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        // Mock fetch or real fetch
-        const fetchOrders = async () => {
-            try {
-                const token = localStorage.getItem("accessToken");
-                const res = await fetch("http://localhost:3001/sales/orders", {
-                    headers: { Authorization: \`Bearer \${token}\` }
-                });
-                const json = await res.json();
-                if (json.success) setOrders(json.data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchOrders();
-    }, []);
+    const { data: orders, isLoading: loading } = useSalesOrders();
 
     return (
         <div className="space-y-6">
@@ -74,7 +45,7 @@ export default function SalesOrdersPage() {
                                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                                 </TableCell>
                             </TableRow>
-                        ) : orders.map((order) => (
+                        ) : orders?.map((order) => (
                             <TableRow key={order.id}>
                                 <TableCell className="font-medium">{order.code}</TableCell>
                                 <TableCell>
@@ -89,7 +60,7 @@ export default function SalesOrdersPage() {
                                 <TableCell className="text-right">{Number(order.totalAmount).toLocaleString()} ₫</TableCell>
                                 <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                                 <TableCell>
-                                    <Link href={\`/admin/sales/orders/\${order.id}\`}>
+                                    <Link href={`/admin/sales/orders/${order.id}`}>
                                         <Button variant="ghost" size="sm">View</Button>
                                     </Link>
                                 </TableCell>

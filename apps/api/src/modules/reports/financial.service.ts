@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { AccountType, JournalStatus } from '@prisma/client';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
+import { AccountType, JournalStatus, Account, JournalEntryLine } from '@repo/database';
 
 @Injectable()
 export class FinancialReportService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async generateBalanceSheet(tenantId: string, date: Date) {
     const accounts = await this.prisma.account.findMany({
@@ -26,13 +26,13 @@ export class FinancialReportService {
       },
     });
 
-    const accountBalances = accounts.map((account) => {
+    const accountBalances = accounts.map((account: Account & { journalLines: JournalEntryLine[] }) => {
       const totalDebit = account.journalLines.reduce(
-        (sum, line) => sum + Number(line.debit),
+        (sum: number, line: JournalEntryLine) => sum + Number(line.debit),
         0,
       );
       const totalCredit = account.journalLines.reduce(
-        (sum, line) => sum + Number(line.credit),
+        (sum: number, line: JournalEntryLine) => sum + Number(line.credit),
         0,
       );
 
@@ -53,8 +53,6 @@ export class FinancialReportService {
       };
     });
 
-    // Build hierarchy handled by frontend or here?
-    // Return flat list with balance for now, easy to tree on frontend.
     return accountBalances;
   }
 
@@ -80,13 +78,13 @@ export class FinancialReportService {
       },
     });
 
-    const accountChanges = accounts.map((account) => {
+    const accountChanges = accounts.map((account: Account & { journalLines: JournalEntryLine[] }) => {
       const totalDebit = account.journalLines.reduce(
-        (sum, line) => sum + Number(line.debit),
+        (sum: number, line: JournalEntryLine) => sum + Number(line.debit),
         0,
       );
       const totalCredit = account.journalLines.reduce(
-        (sum, line) => sum + Number(line.credit),
+        (sum: number, line: JournalEntryLine) => sum + Number(line.credit),
         0,
       );
 
